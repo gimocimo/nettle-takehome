@@ -9,6 +9,7 @@ tenant_patterns = [
     path("evidence/", include("evidence.urls")),
     path("reports/", include("reports.urls")),
     path("templates/", include("reports.template_urls")),
+    path("notifications/", include("notifications.urls")),
 ]
 
 urlpatterns = [

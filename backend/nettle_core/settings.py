@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "configuration",
     "ai",
     "jobs",
+    "notifications",
     "portfolio",
     "assessments",
     "evidence",
@@ -137,6 +138,12 @@ JOBS_RETRY_BASE_SECONDS = int(os.environ.get("JOBS_RETRY_BASE_SECONDS", "30"))
 JOBS_POLL_SECONDS = float(os.environ.get("JOBS_POLL_SECONDS", "1"))
 # Fairness: at most this many running jobs per organization.
 JOBS_MAX_RUNNING_PER_ORG = int(os.environ.get("JOBS_MAX_RUNNING_PER_ORG", "2"))
+
+# Notifications: emails go through the job queue. Console backend in development
+# (printed in the worker's log); production configures SMTP / a provider.
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Nettle <no-reply@nettle.test>")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 # Configuration as code: section library and per-organization configuration.
 TENANT_CONFIG_DIR = BASE_DIR / "tenant_config"

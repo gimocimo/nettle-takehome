@@ -6,7 +6,7 @@ from ai.client import LLMError
 from ai.testing import FakeLLM
 from jobs.models import Job
 from jobs.worker import run_worker
-from nettle_core.testing import make_assessment, make_client, make_note, make_org, org_url
+from nettle_core.testing import drain_jobs, make_assessment, make_client, make_note, make_org, org_url
 from reports.models import ReportTemplate
 from tenancy.models import Membership, Organization
 
@@ -64,6 +64,25 @@ def test_the_worker_generates_the_report_in_the_background(env):
     assert float(report["usage"]["cost_usd"]) > 0
 
 
+def test_the_requester_is_notified_when_the_report_is_ready(env, mailoutbox):
+    report_id = _start(env).data["id"]
+    run_worker(once=True)  # generation
+    inbox = env.engineer.get(org_url(env.org, "notifications/")).data
+    assert inbox["unread"] == 1
+    assert inbox["results"][0]["link"] == f"/o/{env.org.slug}/reports/{report_id}"
+    run_worker(once=True)  # email
+    assert mailoutbox[0].subject.startswith("Report ready")
+
+
+def test_the_requester_is_notified_when_the_report_fails(env):
+    failing = FakeLLM(fail_on_call=1, failure=LLMError("Rejected.", transient=False))
+    env.monkeypatch.setattr("reports.generation.get_client", lambda: failing)
+    _start(env)
+    run_worker(once=True)
+    inbox = env.engineer.get(org_url(env.org, "notifications/")).data
+    assert inbox["results"][0]["title"].startswith("Report failed")
+
+
 def test_starting_the_same_report_twice_is_rejected(env):
     assert _start(env).status_code == 202
     assert _start(env).status_code == 409
@@ -118,7 +137,7 @@ def test_a_failed_report_can_be_retried_and_resumes(env):
     resumed = FakeLLM()
     env.monkeypatch.setattr("reports.generation.get_client", lambda: resumed)
     assert env.engineer.post(org_url(env.org, f"reports/{report_id}/retry/")).status_code == 202
-    run_worker(once=True)
+    drain_jobs()  # the failure email job and the retried generation
     assert _report(env, report_id)["status"] == "completed"
     assert len(resumed.calls) == env.template.ordered_sections().__len__() - 2
 

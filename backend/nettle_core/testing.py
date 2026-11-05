@@ -69,3 +69,16 @@ def make_note(assessment=None, text="Sprinklers present in all areas.", **overri
 
 def make_report(assessment=None, **overrides):
     return Report.objects.create(assessment=assessment or make_assessment(), **overrides)
+
+
+def drain_jobs(max_jobs=50):
+    """Run queued background jobs that are due, until there are none left."""
+    from django.utils import timezone
+
+    from jobs.models import Job
+    from jobs.worker import run_worker
+
+    for _ in range(max_jobs):
+        if not Job.objects.filter(status="READY", run_after__lte=timezone.now()).exists():
+            return
+        run_worker(once=True)

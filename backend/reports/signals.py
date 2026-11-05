@@ -2,6 +2,7 @@ from django.tasks import TaskResultStatus
 from django.tasks.signals import task_finished
 from django.utils import timezone
 
+from notifications.service import notify
 from tenancy.db import tenant_transaction
 from tenancy.models import Organization
 
@@ -21,3 +22,11 @@ def finalize_failed_generation(sender, task_result, **kwargs):
         report.finished_at = timezone.now()
         report.error_message = report.error_message or "Report generation stopped unexpectedly."
         report.save(update_fields=["status", "finished_at", "error_message", "updated_at"])
+        notify(
+            user=report.requested_by,
+            organization=organization,
+            kind="report_failed",
+            title=f"Report failed: {report.title}",
+            body=report.error_message,
+            link=f"/o/{organization.slug}/reports/{report.id}",
+        )

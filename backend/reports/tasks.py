@@ -6,6 +6,8 @@ from jobs.retry import will_retry
 from tenancy.db import tenant_transaction
 from tenancy.models import Organization
 
+from notifications.service import notify
+
 from .generation import generate_report
 from .models import Report
 
@@ -34,4 +36,13 @@ def generate_report_task(context, *, organization_id, report_id):
     with tenant_transaction(organization):
         Report.objects.filter(pk=report_id).update(
             status="completed", current_section="", finished_at=timezone.now()
+        )
+        report = Report.objects.select_related("requested_by").get(pk=report_id)
+        notify(
+            user=report.requested_by,
+            organization=organization,
+            kind="report_completed",
+            title=f"Report ready: {report.title}",
+            body="Your report has been generated and is ready for review.",
+            link=f"/o/{organization.slug}/reports/{report.id}",
         )
