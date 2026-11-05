@@ -3,6 +3,7 @@ from django.core.management import CommandError, call_command
 
 from assessments.models import Assessment
 from portfolio.models import Client
+from tenancy.models import Membership, Organization
 
 
 @pytest.mark.django_db
@@ -10,7 +11,7 @@ def test_seed_refuses_to_run_with_debug_off(settings):
     settings.DEBUG = False
     with pytest.raises(CommandError):
         call_command("seed_data")
-    assert not Client.objects.exists()
+    assert not Organization.objects.exists()
 
 
 @pytest.mark.django_db
@@ -23,12 +24,20 @@ def test_seed_is_all_or_nothing(settings, monkeypatch):
     monkeypatch.setattr(Assessment.objects, "create", explode)
     with pytest.raises(RuntimeError):
         call_command("seed_data")
+    assert not Organization.objects.exists()
     assert not Client.objects.exists()
 
 
 @pytest.mark.django_db
-def test_seed_creates_demo_data_once(settings):
+def test_seed_creates_three_organizations_once(settings):
     settings.DEBUG = True
     call_command("seed_data")
     call_command("seed_data")
-    assert Client.objects.count() == 3
+    assert Organization.objects.count() == 3
+    consultant = Membership.objects.filter(user__email="consultant@nettle.test")
+    assert consultant.count() == 3  # one user, several organizations, different roles
+    assert set(Client.objects.values_list("organization__slug", flat=True)) == {
+        "default-insurer",
+        "customer-a",
+        "customer-b",
+    }
