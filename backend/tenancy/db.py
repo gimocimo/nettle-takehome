@@ -26,15 +26,19 @@ def tenant_transaction(organization):
     with transaction.atomic():
         activate_tenant(organization)
         yield
+    _reset_if_still_in_transaction()
 
 
 def reset_tenant_context(**kwargs):
-    """End-of-request safety net (request_finished signal).
+    """End-of-request safety net (request_finished signal)."""
+    _reset_if_still_in_transaction()
 
-    In production the request's transaction has already ended, so there is nothing to
-    reset. If a transaction is still open (tests wrap each test in one), drop the tenant
-    role so code running after the request doesn't inherit it.
-    """
+
+def _reset_if_still_in_transaction():
+    """SET LOCAL lasts until the *outermost* transaction ends. Normally that is the
+    request's or job's own transaction, so there is nothing to do. When nested inside
+    an outer transaction (tests wrap each test in one), drop the tenant scope here so
+    code after the block doesn't inherit it."""
     if connection.connection is not None and connection.in_atomic_block:
         with connection.cursor() as cursor:
             cursor.execute("RESET ROLE")

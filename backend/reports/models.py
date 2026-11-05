@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 
 from assessments.models import Assessment
@@ -105,16 +106,20 @@ class TemplateSection(models.Model):
 
 
 class Report(models.Model):
-    """
-    A generated risk report for an assessment. Currently stores the full
-    report as a single text blob — AI generates the entire thing in one pass.
+    """A generated risk report for an assessment.
+
+    Structured reports point to the exact template version they were generated
+    with and store one ReportAnswer per question. `content` is kept for legacy
+    free-text reports generated before templates existed.
     """
 
     STATUS_CHOICES = [
-        ("pending", "Pending"),
+        ("pending", "Pending"),  # legacy reports that were never generated
+        ("queued", "Queued"),
         ("generating", "Generating"),
         ("completed", "Completed"),
         ("failed", "Failed"),
+        ("cancelled", "Cancelled"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -124,9 +129,28 @@ class Report(models.Model):
     assessment = models.ForeignKey(
         Assessment, on_delete=models.CASCADE, related_name="reports"
     )
+    template = models.ForeignKey(
+        ReportTemplate, on_delete=models.PROTECT, null=True, blank=True, related_name="reports"
+    )
     title = models.CharField(max_length=255, blank=True, default="")
     content = models.TextField(blank=True, default="")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    language = models.CharField(max_length=16, blank=True, default="")
+    ai_model = models.CharField(max_length=64, blank=True, default="")
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    progress_completed = models.PositiveIntegerField(default=0)
+    progress_total = models.PositiveIntegerField(default=0)
+    current_section = models.CharField(max_length=255, blank=True, default="")
+    error_message = models.TextField(blank=True, default="")  # safe to show to users
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    input_tokens = models.PositiveIntegerField(default=0)
+    output_tokens = models.PositiveIntegerField(default=0)
+    cache_read_tokens = models.PositiveIntegerField(default=0)
+    cache_write_tokens = models.PositiveIntegerField(default=0)
+    cost_usd = models.DecimalField(max_digits=12, decimal_places=6, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -146,3 +170,37 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report: {self.title or self.assessment.title}"
+
+
+class ReportAnswer(models.Model):
+    """One answered question of a structured report.
+
+    ai_value is the model's draft and never changes; value is what the report shows
+    (equal to the draft until an engineer edits it). Keeping both makes human review
+    auditable and measures how often engineers correct the AI, per question.
+    """
+
+    STATUS_CHOICES = [("answered", "Answered"), ("insufficient_evidence", "Insufficient evidence")]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        "tenancy.Organization", on_delete=models.PROTECT, related_name="report_answers"
+    )
+    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="answers")
+    section_key = models.CharField(max_length=64)
+    question_key = models.CharField(max_length=64)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES)
+    ai_value = models.JSONField()
+    value = models.JSONField()
+    confidence = models.CharField(max_length=16)
+    # [{"evidence_id": uuid, "label": "E3", "title": ..., "quote": ..., "verified": bool | None}]
+    citations = models.JSONField(default=list)
+    missing_evidence = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report", "section_key", "question_key"], name="one_answer_per_question"
+            )
+        ]
