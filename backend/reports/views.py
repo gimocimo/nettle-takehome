@@ -43,6 +43,19 @@ class ReportViewSet(OrganizationScopedViewSet):
         report = self.get_object()  # scoping and permissions
         return self.get_queryset().select_for_update(of=("self",)).get(pk=report.pk)
 
+    def perform_update(self, serializer):
+        if self._locked_report().status == "issued":
+            raise ValidationError("Issued reports are final and can't be changed.")
+        serializer.save()
+
+    def perform_destroy(self, report):
+        report = self._locked_report()
+        if report.status == "issued":
+            raise ValidationError("Issued reports are final and can't be deleted.")
+        if report.status in ("queued", "generating"):
+            raise ValidationError("This report is being generated: delete it once it has finished or failed.")
+        report.delete()
+
     def get_serializer_class(self):
         if self.action == "list":
             return ReportListSerializer

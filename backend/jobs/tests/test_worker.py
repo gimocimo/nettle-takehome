@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from django.tasks import TaskResultStatus
+from django.tasks.signals import task_finished
 from django.utils import timezone
 
 from jobs.models import Job
@@ -88,3 +89,18 @@ def test_one_busy_organization_does_not_block_the_others(settings):
     assert str(claim_job("worker").pk) == later.id  # enqueued later, but its tenant has capacity
     assert claim_job("worker") is None  # the busy tenant's third job waits for a free slot
     assert Job.objects.get(pk=waiting.id).status == TaskResultStatus.READY
+
+
+@pytest.mark.django_db
+def test_a_failing_signal_receiver_does_not_stop_the_worker():
+    def broken_receiver(sender, task_result, **kwargs):
+        raise RuntimeError("a bug in a receiver")
+
+    task_finished.connect(broken_receiver)
+    try:
+        result = tasks.record.enqueue(7)
+        run_worker(once=True)  # used to raise, killing the worker process
+    finally:
+        task_finished.disconnect(broken_receiver)
+    result.refresh()
+    assert result.status == TaskResultStatus.SUCCESSFUL

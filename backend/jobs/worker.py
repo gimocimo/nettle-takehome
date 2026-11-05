@@ -116,7 +116,7 @@ def execute(job):
         _finish(job, task, TaskResultStatus.FAILED, error=("jobs.worker.WorkerLost", "Worker lost too many times."))
         return
 
-    task_started.send(sender=PostgresTaskBackendSender, task_result=result)
+    _send(task_started, result)
     try:
         with Heartbeat(job):
             args = [TaskContext(task_result=result), *job.args] if task.takes_context else job.args
@@ -149,7 +149,17 @@ def _finish(job, task, status, error=None, return_value=None):
         return_value=return_value,
     )
     job.refresh_from_db()
-    task_finished.send(sender=PostgresTaskBackendSender, task_result=to_task_result(job, task))
+    _send(task_finished, to_task_result(job, task))
+
+
+def _send(task_signal, task_result):
+    """A failing receiver (e.g. a report-status handler) is logged; it must not stop the worker."""
+    for receiver, response in task_signal.send_robust(sender=PostgresTaskBackendSender, task_result=task_result):
+        if isinstance(response, Exception):
+            logger.error(
+                "Task signal receiver %s failed for job %s", receiver, task_result.id,
+                exc_info=(type(response), response, response.__traceback__),
+            )
 
 
 def _class_path(exc):
@@ -183,7 +193,11 @@ def run_worker(queues=("default",), once=False):
             time.sleep(5)
             continue
         if job is not None:
-            execute(job)
+            try:
+                execute(job)
+            except Exception:  # a bug outside the task (which execute() handles) must not stop the worker
+                logger.exception("Job %s could not be processed; it is retried when its lease expires", job.id)
+                connection.close()
         elif once:
             return
         else:

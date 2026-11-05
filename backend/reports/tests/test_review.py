@@ -148,3 +148,29 @@ def test_a_failing_job_cannot_fail_an_issued_or_deleted_report(setup):
     report.refresh_from_db()
     assert report.status == "issued"
     finalize_failed_generation(sender=None, task_result=_failed_generation(org, uuid.uuid4()))  # deleted: no error
+
+
+def test_issued_reports_cannot_be_deleted_or_renamed(setup):
+    org, report, engineer = setup
+    engineer.post(org_url(org, f"reports/{report.id}/issue/"))
+    url = org_url(org, f"reports/{report.id}/")
+    assert engineer.patch(url, {"title": "Something else"}, format="json").status_code == 400
+    assert engineer.delete(url).status_code == 400
+    report.refresh_from_db()
+    assert report.status == "issued"
+    assert report.title != "Something else"
+
+
+def test_reports_being_generated_cannot_be_deleted(setup):
+    # Deleting mid-generation would leave the worker writing to a report that's gone.
+    org, report, engineer = setup
+    Report.objects.filter(pk=report.pk).update(status="generating")
+    assert engineer.delete(org_url(org, f"reports/{report.id}/")).status_code == 400
+    assert Report.objects.filter(pk=report.pk).exists()
+
+
+def test_completed_reports_can_still_be_renamed_and_deleted(setup):
+    org, report, engineer = setup
+    url = org_url(org, f"reports/{report.id}/")
+    assert engineer.patch(url, {"title": "Renamed"}, format="json").status_code == 200
+    assert engineer.delete(url).status_code == 204
