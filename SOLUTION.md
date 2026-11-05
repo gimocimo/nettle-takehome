@@ -8,17 +8,19 @@ explains what I built, why, what I deliberately left as a proposal, and what I f
 
 | Challenge | Status | In one line |
 |---|---|---|
-| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing; engineers review, correct and issue the report. |
+| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing; any section can be regenerated; engineers review, correct and issue the report. |
 | 2. Customisable client fields | ✅ Built | A per-organization field registry: built-in columns plus JSON custom fields, renamed / relaxed / hidden / extended from a reviewed YAML file. No model change per customer. |
 | 3. Background generation | ✅ Built | A Postgres job queue behind Django 6's Tasks API; resumable section-by-section generation; in-app, desktop, email and webhook notifications. |
 | 4. Multi-tenancy | ✅ Core built, 📝 regions proposed | Organizations, memberships and roles; organization in the URL; one scoped base class for every endpoint; Postgres row-level security underneath; an isolation test suite. |
-| Production issues | ✅ 24 fixed, 📝 12 documented | See [the review](#production-readiness-review). Includes CI and production images. |
+| AI model and cost | ✅ Built | Engineers pick the model per report from the organization's allowed list, with a cost estimate for each; every call's tokens and cost are recorded; monthly budgets per organization. |
+| Production issues | ✅ 25 fixed, 📝 12 documented | See [the review](#production-readiness-review). Includes CI and production images. |
 
 In the code, `git grep PROPOSED` lists every extension point that is proposed but not built.
 
-**Timebox.** Everything above was built inside the suggested time box (the commit
-history shows the order and the pace). The tag `timebox-end` marks the end of the
-challenge work; anything after it is clearly labelled bonus material.
+**Timebox.** Everything above was built within three hours of the first commit (the
+history shows the order and the pace), and checked against the real Claude API
+([numbers below](#verified-with-real-claude-runs)). The tag `timebox-end` marks the
+end of the challenge work; anything after it is clearly labelled bonus material.
 
 ## Context
 
@@ -86,16 +88,25 @@ questions**. The AI answers the questions; it no longer writes a free-text blob.
 
 ### Generation
 
-One structured-output call per section (`output_config.format` with the JSON schema
-compiled from the section's questions):
+One structured-output call per section:
 
-- **Why per section and not one call**: small schemas the model fills reliably,
-  per-section progress and retries (a failure loses one section, not the report), and
-  the option to regenerate a single section later.
-- **The cost of repeating the evidence is cached away.** Every call starts with the
-  same prefix (system prompt, client and assessment context, all evidence) with a cache
-  breakpoint after the last evidence block, so sections 2..N read it at the
-  cache-read price. A test asserts the prefix is byte-identical across calls.
+- **Why per section and not one call**: per-section progress and retries (a failure
+  loses one section, not the report), focused answers, and **regenerating a single
+  section** when evidence changes (built: the section and the summary sections that
+  summarise it are replaced; everything else, engineers' edits included, stays).
+- **The cost of repeating the evidence is cached away, measured.** Every call starts
+  with the same prefix (system prompt, client and assessment context, all evidence)
+  with a cache breakpoint after the last evidence block. My first version gave each
+  section its own output schema, and the first live run showed **zero cache reads**.
+  A controlled experiment against the API showed why: the output schema is part of
+  the cached prefix. Declaring every section as a strict tool instead hit the API's
+  limit on compiled schema size. So every section now uses **one compact report-wide
+  schema**: answers keyed by `section.question`, with typed value fields. Per-question
+  rules (choice values must be one of the options, every question answered) are
+  checked on the server before saving, and violations are retried. Result on the same
+  assessment: **$0.52 → $0.29 per report (−45%)**, with one cache write and six cache
+  reads. A test asserts that schema, system prompt and evidence are byte-identical
+  across a report's calls.
 - **Synthesis sections** (executive summary, overall rating) run last and are written
   from the other sections' answers.
 - **The AI now sees the evidence.** The prototype sent a photo's *title* and a PDF's
@@ -407,9 +418,10 @@ trail, per-tenant API rate limits, and per-tenant encryption keys.
 | 19 | Any failed fetch left pages on "Loading…" forever; failed reports were hidden | Error states everywhere; all report statuses shown (`5e13505`, `38a2594`) |
 | 20 | SSE client broke multi-byte characters and dropped events split across chunks | SSE removed; progress by polling (`38a2594`) |
 | 21 | UK clients' money shown in `$`; a value of 0 shown as "—"; report Markdown shown raw | Organization currency, correct empty check, structured rendering (`8630494`, `38a2594`) |
-| 22 | No tests and no CI | 134 tests, including tenant isolation and RLS; GitHub Actions runs them, validates every customer's config and builds the frontend (throughout, `a0a1d99`) |
+| 22 | No tests and no CI | 142 tests, including tenant isolation and RLS; GitHub Actions runs them, validates every customer's config and builds the frontend (throughout, `a0a1d99`) |
 | 23 | Containers ran the dev servers (`runserver`, `next dev`) as root, with `npm install` and a compiler in the image | Multi-stage images: gunicorn + WhiteNoise and the Next.js standalone server, non-root, `npm ci`; `docker-compose.prod.yaml` runs migrations as a one-off job before the app (`05c7ee5`) |
 | 24 | No human checkpoint between the AI's draft and the client | Engineers edit answers (AI draft kept), then approve and issue a locked report (`5e816f7`, `a29c145`) |
+| 25 | *Found in my own work by the first live run:* prompt caching never hit (the per-section output schema is part of the cached prefix) | One report-wide schema with server-side per-question checks: −45% cost per report, measured (`c48f83c`) |
 
 ### Documented, not fixed
 
@@ -430,14 +442,40 @@ trail, per-tenant API rate limits, and per-tenant encryption keys.
 
 ---
 
+## Verified with real Claude runs
+
+Generated through the app with Claude Opus 5.5 (effort `medium`):
+
+| Run | Sections | Time | Cost | Cache | Answers |
+|---|---|---|---|---|---|
+| Pacific Coast, COPE survey (3 photos, 2 notes), first version | 7 | 130 s | $0.52 | 0 tokens read; every section rewrote ~9.5k | 12 answered, 10 "insufficient evidence"; 31 quotes, all verified |
+| Same, after the caching fix | 7 | 117 s | $0.29 | one write of 9,437, then 6 × 9,437 read | 22 answers |
+| Customer A: Udine survey PDF (4 pages) + 3 photos, COPE survey **in Italian** | 7 | 192 s | $0.57 | one write of 19,088, then 6 × 19,088 read | 20 answered, 2 "insufficient evidence"; 69 quotes, all verified against the PDF text; 9 recommendations |
+
+What the output shows:
+
+- **The model reads the photos.** It noted that the photo titled "Flammable liquid IBC
+  containment" shows the containment unit *with no IBC visibly in place*.
+- **It says what it doesn't know.** Construction and natural hazards were marked
+  "insufficient evidence", each with a specific request: FEMA flood zone, proximity
+  to the Newport–Inglewood fault, NFPA 72 test certificates, a water-flow test
+  against the 40 ft rack design.
+- **The estimate holds up.** The model picker estimated $0.27 for a run that cost
+  $0.29, with output calibrated on the organization's 14 previous sections.
+
 ## What I'd do next
 
-1. An evaluation set from real surveys, run in CI on every prompt or template change.
-2. Pagination, soft delete with retention, and an audit log: the next production
-   gaps for real customer data.
-3. LISTEN/NOTIFY for instant job pickup and live progress.
-4. The two-stage evidence pipeline for large assessments.
-5. Regions and the migration path from per-customer deployments.
+1. An evaluation set from real surveys, run in CI on every prompt or template change
+   (the Udine PDF's five numbered recommendations are a natural first case).
+2. From the original plan, not built yet: cancelling a running generation,
+   pagination and filters, evidence thumbnails and deletion (refused while an issued
+   report cites the item), iPhone HEIC photos, report export to PDF/DOCX, and a
+   development inbox (Mailpit) for notification emails.
+3. Soft delete with retention, and an audit log: the next production gaps for real
+   customer data.
+4. LISTEN/NOTIFY for instant job pickup and live progress.
+5. The two-stage evidence pipeline for large assessments.
+6. Regions and the migration path from per-customer deployments.
 
 ## How I used AI
 
@@ -449,5 +487,6 @@ configuration as code, the section library, a Postgres queue behind the Tasks AP
 fairness, webhooks, budgets). It then implemented commit by commit, with a test in
 each commit. I reviewed the changes as they landed, and the history is the real
 order of work, including the bugs we found along the way (the isolation suite caught
-a broken route; the first live run caught a workspace-scoped API key). Commits
+a broken route; the first live run showed prompt caching wasn't hitting, which we
+then proved with a controlled experiment and fixed, measuring the saving). Commits
 carry a `Co-Authored-By` trailer.

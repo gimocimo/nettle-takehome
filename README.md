@@ -53,14 +53,15 @@ The three organizations mirror the brief:
 
 1. Sign in as `consultant@nettle.test` and use the organization switcher: the
    portfolio's columns, the client form and the templates change per organization.
-2. In Default Insurer, open **Q4 Warehouse Risk Review**, pick a template and
-   **Generate report**. It runs in the background: close the tab if you like. The
-   bell, a desktop notification and an email (printed in `docker compose logs
-   worker`) tell you when it's ready.
+2. In Default Insurer, open **Q4 Warehouse Risk Review**, pick a template and a
+   model (each shows its estimated cost) and **Generate report**. It runs in the
+   background: close the tab if you like. The bell, a desktop notification and an
+   email (printed in `docker compose logs worker`) tell you when it's ready.
 3. The report shows typed answers with citations to the evidence (quotes are
    verified against it), "insufficient evidence" where the AI couldn't answer,
-   and an **Evidence gaps** list of what to collect next. Edit an answer (the AI's
-   draft is kept), then **Approve and issue** to lock the report.
+   and an **Evidence gaps** list of what to collect next. Regenerate any section,
+   edit an answer (the AI's draft is kept), then **Approve and issue** to lock the
+   report.
 4. `docker compose logs backend | grep Webhook` shows the signed `report.completed`
    webhook arriving at the demo receiver, with its signature verified.
 
@@ -70,9 +71,10 @@ The three organizations mirror the brief:
 docker compose run --rm backend pytest
 ```
 
-134 tests. They cover tenant isolation on every endpoint, row-level security
+142 tests. They cover tenant isolation on every endpoint, row-level security
 directly in the database, the job queue, configuration sync, field validation, the
-generation pipeline (with a fake LLM, so no API calls) and report review. GitHub
+generation pipeline (with a fake LLM, so no API calls), cost estimates, section
+regeneration and report review. GitHub
 Actions runs them on every push, validates every customer's configuration and
 builds the frontend.
 
