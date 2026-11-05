@@ -1,9 +1,10 @@
-from rest_framework import viewsets
+from tenancy.api import OrganizationScopedViewSet
+
 from .models import Client
 from .serializers import ClientSerializer, ClientListSerializer
 
 
-class ClientViewSet(viewsets.ModelViewSet):
+class ClientViewSet(OrganizationScopedViewSet):
     queryset = Client.objects.all()
 
     def get_serializer_class(self):

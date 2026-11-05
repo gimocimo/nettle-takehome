@@ -84,6 +84,9 @@ if not DATABASE_URL:
 DATABASES = {
     "default": dj_database_url.parse(DATABASE_URL, conn_max_age=60, conn_health_checks=True),
 }
+# One transaction per request: writes are all-or-nothing, and the tenant context set for
+# row-level security (SET LOCAL) lasts exactly as long as the request.
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 # Only the frontend origin may call the API from a browser.
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
@@ -96,7 +99,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+        "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_THROTTLE_RATES": {"login": "10/min"},
 }

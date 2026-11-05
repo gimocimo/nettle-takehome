@@ -13,6 +13,10 @@ from tenancy.models import Membership, Organization
 _sequence = itertools.count(1)
 
 
+def org_url(organization, path):
+    return f"/api/o/{organization.slug}/{path.lstrip('/')}"
+
+
 def make_org(slug=None, **overrides):
     slug = slug or f"org-{next(_sequence)}"
     return Organization.objects.create(slug=slug, name=overrides.pop("name", slug.title()), **overrides)

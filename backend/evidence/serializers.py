@@ -1,10 +1,12 @@
 from rest_framework import serializers
 
+from tenancy.api import OrganizationScopedSerializer
+
 from .models import Evidence
 from .uploads import inspect_upload
 
 
-class EvidenceSerializer(serializers.ModelSerializer):
+class EvidenceSerializer(OrganizationScopedSerializer):
     class Meta:
         model = Evidence
         fields = [

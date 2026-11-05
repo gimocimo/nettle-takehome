@@ -1,13 +1,13 @@
 import pytest
 
-from nettle_core.testing import make_assessment, make_report
+from nettle_core.testing import make_assessment, make_client, make_report, org_url
 
 
 @pytest.mark.django_db
-def test_api_callers_cannot_set_report_status_or_content(api_client):
-    report = make_report()
-    response = api_client.patch(
-        f"/api/reports/{report.id}/",
+def test_api_callers_cannot_set_report_status_or_content(engineer, org):
+    report = make_report(make_assessment(make_client(org)))
+    response = engineer.patch(
+        org_url(org, f"reports/{report.id}/"),
         {"status": "completed", "content": "Everything is fine."},
         format="json",
     )
@@ -18,10 +18,11 @@ def test_api_callers_cannot_set_report_status_or_content(api_client):
 
 
 @pytest.mark.django_db
-def test_report_cannot_be_moved_to_another_assessment(api_client):
-    report = make_report()
-    other = make_assessment()
-    response = api_client.patch(
-        f"/api/reports/{report.id}/", {"assessment": str(other.id)}, format="json"
+def test_report_cannot_be_moved_to_another_assessment(engineer, org):
+    client = make_client(org)
+    report = make_report(make_assessment(client))
+    other = make_assessment(client)
+    response = engineer.patch(
+        org_url(org, f"reports/{report.id}/"), {"assessment": str(other.id)}, format="json"
     )
     assert response.status_code == 400

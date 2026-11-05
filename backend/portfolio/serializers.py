@@ -1,11 +1,14 @@
 from rest_framework import serializers
+
+from tenancy.api import OrganizationScopedSerializer
+
 from .models import Client
 
 
-class ClientSerializer(serializers.ModelSerializer):
+class ClientSerializer(OrganizationScopedSerializer):
     class Meta:
         model = Client
-        fields = "__all__"
+        exclude = ["organization"]
 
 
 class ClientListSerializer(serializers.ModelSerializer):

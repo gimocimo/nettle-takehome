@@ -1,8 +1,11 @@
 from rest_framework import serializers
+
+from tenancy.api import OrganizationScopedSerializer
+
 from .models import Report
 
 
-class ReportSerializer(serializers.ModelSerializer):
+class ReportSerializer(OrganizationScopedSerializer):
     assessment_title = serializers.CharField(
         source="assessment.title", read_only=True
     )

@@ -1,9 +1,10 @@
-from rest_framework import viewsets
+from tenancy.api import OrganizationScopedViewSet
+
 from .models import Assessment
 from .serializers import AssessmentSerializer, AssessmentListSerializer
 
 
-class AssessmentViewSet(viewsets.ModelViewSet):
+class AssessmentViewSet(OrganizationScopedViewSet):
     queryset = Assessment.objects.select_related("client").all()
 
     def get_serializer_class(self):

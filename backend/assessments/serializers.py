@@ -1,13 +1,16 @@
 from rest_framework import serializers
+
+from tenancy.api import OrganizationScopedSerializer
+
 from .models import Assessment
 
 
-class AssessmentSerializer(serializers.ModelSerializer):
+class AssessmentSerializer(OrganizationScopedSerializer):
     client_name = serializers.CharField(source="client.name", read_only=True)
 
     class Meta:
         model = Assessment
-        fields = "__all__"
+        exclude = ["organization"]
 
 
 class AssessmentListSerializer(serializers.ModelSerializer):

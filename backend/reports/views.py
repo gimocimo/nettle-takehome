@@ -7,13 +7,14 @@ from rest_framework.response import Response
 import anthropic
 
 from nettle_core.params import uuid_query_param
+from tenancy.api import OrganizationScopedViewSet
 
 from .models import Report
 from .serializers import ReportSerializer, ReportListSerializer
 from evidence.models import Evidence
 
 
-class ReportViewSet(viewsets.ModelViewSet):
+class ReportViewSet(OrganizationScopedViewSet):
     queryset = Report.objects.select_related("assessment").all()
 
     def get_serializer_class(self):
