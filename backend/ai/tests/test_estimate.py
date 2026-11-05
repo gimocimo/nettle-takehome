@@ -49,6 +49,16 @@ def test_estimates_calibrate_on_the_organizations_own_history(setup):
     assert opus["basis"] == "calibrated on 5 past sections"
 
 
+def test_failed_calls_dont_calibrate_the_estimate(setup):
+    org, assessment, template, engineer = setup
+    for _ in range(5):
+        AIUsage.objects.create(
+            organization=org, purpose="report_section:x:failed", model="claude-opus-5-5", output_tokens=16000, cost_usd=Decimal("0.4")
+        )
+    opus = _estimate(engineer, org, assessment, template).data["models"][0]
+    assert opus["basis"] == "default assumptions"
+
+
 def test_engineers_choose_among_the_organizations_models_only(setup):
     org, assessment, template, engineer = setup
     payload = {"assessment": str(assessment.id), "template": str(template.id)}

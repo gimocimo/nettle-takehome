@@ -23,11 +23,15 @@ TRANSIENT_STATUS_CODES = {408, 409, 429}
 # Claude API's inference_geo pins US vs global only, so EU-only inference would go
 # through an EU cloud region (Bedrock or Vertex AI) configured per deployment.
 class LLMError(Exception):
-    """`transient` tells the job queue whether retrying later can help."""
+    """`transient` tells the job queue whether retrying later can help. `usage` and
+    `model` are set when the call was billed anyway (a refusal, or an answer cut off or
+    malformed), so the cost ledger still records it."""
 
-    def __init__(self, message, *, transient):
+    def __init__(self, message, *, transient, usage=None, model=None):
         super().__init__(message)
         self.transient = transient
+        self.usage = usage
+        self.model = model
 
 
 @dataclass
@@ -77,26 +81,24 @@ class AnthropicClient:
             logger.warning("AI request rejected: %s", exc)
             raise LLMError(f"AI request rejected ({exc.status_code}).", transient=False) from exc
 
+        # Billed from here on, whatever the answer: errors carry the usage.
+        usage = {
+            "input_tokens": response.usage.input_tokens or 0,
+            "output_tokens": response.usage.output_tokens or 0,
+            "cache_read_tokens": response.usage.cache_read_input_tokens or 0,
+            "cache_write_tokens": response.usage.cache_creation_input_tokens or 0,
+        }
+        billed = {"usage": usage, "model": response.model}
         if response.stop_reason == "refusal":
-            raise LLMError("The AI declined to answer this section.", transient=False)
+            raise LLMError("The AI declined to answer this section.", transient=False, **billed)
         if response.stop_reason == "max_tokens":
-            raise LLMError("The AI's answer was cut off (max_tokens).", transient=False)
+            raise LLMError("The AI's answer was cut off (max_tokens).", transient=False, **billed)
         text = next((block.text for block in response.content if block.type == "text"), "")
         try:
             data = json.loads(text)
         except json.JSONDecodeError as exc:
-            raise LLMError("The AI returned malformed output.", transient=True) from exc
-        usage = response.usage
-        return LLMResult(
-            data=data,
-            model=response.model,
-            usage={
-                "input_tokens": usage.input_tokens or 0,
-                "output_tokens": usage.output_tokens or 0,
-                "cache_read_tokens": usage.cache_read_input_tokens or 0,
-                "cache_write_tokens": usage.cache_creation_input_tokens or 0,
-            },
-        )
+            raise LLMError("The AI returned malformed output.", transient=True, **billed) from exc
+        return LLMResult(data=data, model=response.model, usage=usage)
 
 
 def get_client():

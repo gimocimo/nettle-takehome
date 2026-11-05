@@ -132,3 +132,35 @@ def test_choice_answers_are_matched_case_insensitively():
 
     rating = Question(key="r", prompt="Rating", type="rating", options=["Low", "High"])
     assert coerce_answer(rating, {"status": "answered", "text": " high "}) == "High"
+
+
+BILLED_USAGE = {"input_tokens": 900, "output_tokens": 30, "cache_read_tokens": 0, "cache_write_tokens": 0}
+
+
+def test_answers_rejected_by_our_checks_are_still_billed(report, monkeypatch):
+    monkeypatch.setattr("reports.generation.get_client", lambda: _OffOptions())
+    with pytest.raises(LLMError):
+        generate_report(report.id)
+    assert AIUsage.objects.filter(report=report, purpose__endswith=":failed").count() == 1
+    report.refresh_from_db()
+    assert report.cost_usd == sum(u.cost_usd for u in AIUsage.objects.filter(report=report))
+
+
+def test_refused_or_cut_off_answers_are_still_billed(report, monkeypatch):
+    refusal = LLMError("The AI declined to answer this section.", transient=False, usage=BILLED_USAGE, model="claude-opus-5-5")
+    monkeypatch.setattr("reports.generation.get_client", lambda: FakeLLM(fail_on_call=1, failure=refusal))
+    with pytest.raises(LLMError):
+        generate_report(report.id)
+    [usage] = AIUsage.objects.filter(report=report)
+    assert usage.purpose.endswith(":failed")
+    assert usage.input_tokens == 900
+    report.refresh_from_db()
+    assert report.cost_usd == usage.cost_usd > 0
+    assert report.progress_completed == 0
+
+
+def test_calls_that_never_reached_the_model_cost_nothing(report, monkeypatch):
+    monkeypatch.setattr("reports.generation.get_client", lambda: FakeLLM(fail_on_call=1))  # e.g. overloaded
+    with pytest.raises(LLMError):
+        generate_report(report.id)
+    assert not AIUsage.objects.filter(report=report).exists()

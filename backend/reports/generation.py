@@ -88,35 +88,47 @@ def generate_report(report_id):
             Report.objects.filter(pk=report.pk).update(current_section=spec.title)
             previous = _previous_answers(report, sections) if spec.synthesis else None
 
-        result = client.generate_json(
-            model=report.ai_model,
-            system=system,
-            content=[*prefix, {"type": "text", "text": _section_instruction(spec, previous)}],
-            schema=schema,
-        )
-        answers = _answers(report, spec, result.data, by_label)  # validated before saving
+        try:
+            result = client.generate_json(
+                model=report.ai_model,
+                system=system,
+                content=[*prefix, {"type": "text", "text": _section_instruction(spec, previous)}],
+                schema=schema,
+            )
+        except LLMError as exc:
+            if exc.usage:  # billed, though unusable (refused, cut off, malformed)
+                with tenant_transaction(organization):
+                    model = exc.model or report.ai_model
+                    _record_usage(organization, report, f"report_section:{spec.key}:failed", model, exc.usage)
+            raise
+        try:
+            answers = _answers(report, spec, result.data, by_label)  # validated before saving
+        except LLMError:  # billed, then rejected by our checks (and retried)
+            with tenant_transaction(organization):
+                _record_usage(organization, report, f"report_section:{spec.key}:failed", result.model, result.usage)
+            raise
 
         with tenant_transaction(organization):
             ReportAnswer.objects.bulk_create(answers)
-            cost = cost_usd(result.model, **result.usage)
-            AIUsage.objects.create(
-                organization=organization,
-                report=report,
-                purpose=f"report_section:{spec.key}",
-                model=result.model,
-                cost_usd=cost,
-                **result.usage,
-            )
-            Report.objects.filter(pk=report.pk).update(
-                progress_completed=F("progress_completed") + 1,
-                input_tokens=F("input_tokens") + result.usage["input_tokens"],
-                output_tokens=F("output_tokens") + result.usage["output_tokens"],
-                cache_read_tokens=F("cache_read_tokens") + result.usage["cache_read_tokens"],
-                cache_write_tokens=F("cache_write_tokens") + result.usage["cache_write_tokens"],
-                cost_usd=Coalesce("cost_usd", Value(Decimal(0)), output_field=DecimalField())
-                + (cost or Decimal(0)),
-            )
-            warn_if_near_budget(organization)
+            _record_usage(organization, report, f"report_section:{spec.key}", result.model, result.usage)
+            Report.objects.filter(pk=report.pk).update(progress_completed=F("progress_completed") + 1)
+
+
+def _record_usage(organization, report, purpose, model, usage):
+    """Every billed call reaches the ledger (budgets) and the report's totals,
+    including calls whose answer couldn't be used."""
+    cost = cost_usd(model, **usage)
+    AIUsage.objects.create(
+        organization=organization, report=report, purpose=purpose, model=model, cost_usd=cost, **usage
+    )
+    Report.objects.filter(pk=report.pk).update(
+        input_tokens=F("input_tokens") + usage["input_tokens"],
+        output_tokens=F("output_tokens") + usage["output_tokens"],
+        cache_read_tokens=F("cache_read_tokens") + usage["cache_read_tokens"],
+        cache_write_tokens=F("cache_write_tokens") + usage["cache_write_tokens"],
+        cost_usd=Coalesce("cost_usd", Value(Decimal(0)), output_field=DecimalField()) + (cost or Decimal(0)),
+    )
+    warn_if_near_budget(organization)
 
 
 def _context_text(report):

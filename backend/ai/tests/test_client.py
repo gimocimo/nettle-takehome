@@ -71,3 +71,22 @@ def test_a_successful_call_returns_data_and_usage(settings):
     result = call(client_answering(200, body))
     assert result.data == {"answers": []}
     assert result.usage == {"input_tokens": 10, "output_tokens": 5, "cache_read_tokens": 100, "cache_write_tokens": 0}
+
+
+def test_a_refusal_still_reports_what_was_billed(settings):
+    settings.AI_EFFORT = "medium"
+    body = {
+        "id": "msg_2",
+        "type": "message",
+        "role": "assistant",
+        "model": "claude-opus-5-5",
+        "content": [],
+        "stop_reason": "refusal",
+        "stop_sequence": None,
+        "usage": {"input_tokens": 900, "output_tokens": 3, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0},
+    }
+    with pytest.raises(LLMError) as raised:
+        call(client_answering(200, body))
+    assert not raised.value.transient
+    assert raised.value.model == "claude-opus-5-5"
+    assert raised.value.usage == {"input_tokens": 900, "output_tokens": 3, "cache_read_tokens": 0, "cache_write_tokens": 0}

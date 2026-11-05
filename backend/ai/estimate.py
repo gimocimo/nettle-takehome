@@ -52,9 +52,13 @@ def estimate_report_costs(organization, template, evidence_items):
     since = timezone.now() - timedelta(days=90)
     estimates = []
     for model in organization.allowed_ai_models:
-        history = AIUsage.objects.filter(
-            organization=organization, model=model, purpose__startswith="report_section:", created_at__gte=since
-        ).aggregate(output=Avg("output_tokens"), count=Count("id"))
+        history = (
+            AIUsage.objects.filter(
+                organization=organization, model=model, purpose__startswith="report_section:", created_at__gte=since
+            )
+            .exclude(purpose__endswith=":failed")  # calibrate on sections that were used
+            .aggregate(output=Avg("output_tokens"), count=Count("id"))
+        )
         calibrated = history["count"] >= MIN_HISTORY
         output = int(history["output"]) if calibrated else DEFAULT_OUTPUT_TOKENS_PER_SECTION
         estimate = {
