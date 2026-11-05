@@ -145,6 +145,25 @@ export default function ReportDetailPage() {
     load();
   };
 
+  const regenerateSection = async (sectionKey: string) => {
+    // The section itself and the synthesis sections that summarise it are replaced.
+    const replaced = report.sections.filter((s) => s.key === sectionKey || s.synthesis);
+    const edits = replaced.flatMap((s) => s.questions).filter((q) => q.answer?.edited).length;
+    const title = report.sections.find((s) => s.key === sectionKey)?.title;
+    const summaries = replaced.filter((s) => s.key !== sectionKey).map((s) => s.title);
+    const message =
+      `Regenerate "${title}" from the assessment's current evidence?` +
+      (summaries.length ? ` ${summaries.join(", ")} will be refreshed too.` : "") +
+      (edits ? ` ${edits} engineer edit${edits > 1 ? "s" : ""} in these sections will be replaced.` : "");
+    if (!confirm(message)) return;
+    try {
+      await apiPost(orgPath(org, `reports/${report.id}/regenerate/`), { section: sectionKey });
+      load();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  };
+
   const cachedShare =
     report.usage.input_tokens + report.usage.cache_read_tokens > 0
       ? Math.round((report.usage.cache_read_tokens / (report.usage.input_tokens + report.usage.cache_read_tokens + report.usage.cache_write_tokens)) * 100)
@@ -245,7 +264,18 @@ export default function ReportDetailPage() {
       <div className="space-y-6">
         {report.sections.map((section) => (
           <section key={section.key} className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="font-semibold text-lg mb-4">{section.title}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg">{section.title}</h2>
+              {reviewable && (
+                <button
+                  onClick={() => regenerateSection(section.key)}
+                  className="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 rounded px-2 py-1"
+                  title="Regenerate this section from the assessment's current evidence"
+                >
+                  ↻ Regenerate
+                </button>
+              )}
+            </div>
             <div className="space-y-5">
               {section.questions.map((question) => (
                 <div key={question.key}>

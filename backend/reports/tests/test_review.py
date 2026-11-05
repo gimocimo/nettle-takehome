@@ -2,7 +2,7 @@ import pytest
 from django.core.management import call_command
 
 from ai.testing import FakeLLM
-from nettle_core.testing import make_assessment, make_client, make_note, org_url
+from nettle_core.testing import drain_jobs, make_assessment, make_client, make_note, org_url
 from reports.generation import generate_report
 from reports.models import Report, ReportAnswer, ReportTemplate
 from tenancy.models import Membership, Organization
@@ -77,3 +77,31 @@ def test_only_completed_reports_can_be_issued(setup):
     org, report, engineer = setup
     Report.objects.filter(pk=report.pk).update(status="generating")
     assert engineer.post(org_url(org, f"reports/{report.id}/issue/")).status_code == 400
+
+
+def test_regenerating_a_section_replaces_it_and_the_summary_only(setup):
+    org, report, engineer = setup
+    _edit(engineer, org, report, "site-overview", "operations", "Two shifts, 120 staff.")  # another section
+    _edit(engineer, org, report, "fire-protection", "water_supply", "Town main only.")  # will be replaced
+    response = engineer.post(org_url(org, f"reports/{report.id}/regenerate/"), {"section": "fire-protection"}, format="json")
+    assert response.status_code == 202, response.data
+    assert response.data["status"] == "queued"
+    assert response.data["discarded_edits"] == 1
+    remaining = set(ReportAnswer.objects.filter(report=report).values_list("section_key", flat=True))
+    assert "fire-protection" not in remaining and "executive-summary" not in remaining
+    assert ReportAnswer.objects.get(report=report, question_key="operations").value == "Two shifts, 120 staff."
+
+    drain_jobs()
+    report.refresh_from_db()
+    assert report.status == "completed"
+    assert ReportAnswer.objects.filter(report=report, section_key="fire-protection").exists()
+    assert ReportAnswer.objects.get(report=report, question_key="operations").value == "Two shifts, 120 staff."
+
+
+def test_issued_reports_and_unknown_sections_cannot_be_regenerated(setup):
+    org, report, engineer = setup
+    unknown = engineer.post(org_url(org, f"reports/{report.id}/regenerate/"), {"section": "nope"}, format="json")
+    assert unknown.status_code == 400
+    engineer.post(org_url(org, f"reports/{report.id}/issue/"))
+    locked = engineer.post(org_url(org, f"reports/{report.id}/regenerate/"), {"section": "fire-protection"}, format="json")
+    assert locked.status_code == 400

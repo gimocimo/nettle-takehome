@@ -140,6 +140,45 @@ class ReportViewSet(OrganizationScopedViewSet):
         report.save(update_fields=["status", "issued_by", "issued_at", "updated_at"])
         return Response(ReportSerializer(report, context=self.get_serializer_context()).data)
 
+    @action(detail=True, methods=["post"])
+    def regenerate(self, request, pk=None, **kwargs):
+        """Regenerate one section from the assessment's current evidence (e.g. after a
+        photo of the pump room was added), plus the synthesis sections that summarise
+        it. Every other section, engineers' edits included, stays as it is."""
+        report = self.get_object()
+        if report.status != "completed":
+            raise ValidationError("Only completed reports that haven't been issued can be regenerated.")
+        specs = {section.key: section.spec for section in report.template.ordered_sections()}
+        section_key = request.data.get("section")
+        if section_key not in specs:
+            raise ValidationError({"section": "Unknown section for this report's template."})
+        if budget_status(request.organization)["status"] == "exceeded":
+            return Response(
+                {"detail": "This organization's monthly AI budget has been reached. An admin can raise it."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        replaced = {section_key} | {key for key, spec in specs.items() if spec.synthesis}
+        answers = report.answers.filter(section_key__in=replaced)
+        discarded_edits = answers.filter(edited_at__isnull=False).count()
+        try:
+            with transaction.atomic():
+                answers.delete()
+                remaining = report.answers.values("section_key").distinct().count()
+                report.status, report.error_message, report.finished_at = "queued", "", None
+                report.progress_completed, report.current_section = remaining, ""
+                report.save(
+                    update_fields=["status", "error_message", "finished_at", "progress_completed", "current_section", "updated_at"]
+                )
+        except IntegrityError:
+            return Response(
+                {"detail": "This report is already being generated for this assessment."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        # Generation resumes: it regenerates exactly the sections that have no answers.
+        generate_report_task.enqueue(organization_id=str(report.organization_id), report_id=str(report.id))
+        data = ReportSerializer(report, context=self.get_serializer_context()).data
+        return Response({**data, "discarded_edits": discarded_edits}, status=status.HTTP_202_ACCEPTED)
+
 
 class ReportTemplateViewSet(OrganizationScopedViewSet):
     """The organization's templates currently offered for new reports."""
