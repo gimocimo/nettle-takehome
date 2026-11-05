@@ -7,6 +7,10 @@ from .uploads import inspect_upload
 
 
 class EvidenceSerializer(OrganizationScopedSerializer):
+    # The storage path is never exposed; files are downloaded through the API.
+    file = serializers.FileField(write_only=True, required=False)
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Evidence
         fields = [
@@ -16,6 +20,7 @@ class EvidenceSerializer(OrganizationScopedSerializer):
             "title",
             "description",
             "file",
+            "file_url",
             "original_filename",
             "media_type",
             "text_content",
@@ -23,6 +28,13 @@ class EvidenceSerializer(OrganizationScopedSerializer):
         ]
         # The type is derived from the file's content, never trusted from the client.
         read_only_fields = ["evidence_type", "original_filename", "media_type", "created_at"]
+
+    def get_file_url(self, obj):
+        if not obj.file:
+            return None
+        path = f"/api/o/{obj.organization.slug}/evidence/{obj.id}/file/"
+        request = self.context.get("request")
+        return request.build_absolute_uri(path) if request else path
 
     def validate_assessment(self, value):
         if self.instance is not None and value != self.instance.assessment:
