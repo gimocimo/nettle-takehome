@@ -30,7 +30,7 @@ class ReportViewSet(OrganizationScopedViewSet):
         return qs
 
     @action(detail=True, methods=["post"])
-    def generate(self, request, pk=None):
+    def generate(self, request, pk=None, **kwargs):
         """
         Generate report content using AI. Streams the response back to the
         client via Server-Sent Events so the user can see it being written
