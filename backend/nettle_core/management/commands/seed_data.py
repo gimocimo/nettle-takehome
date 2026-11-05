@@ -1,7 +1,9 @@
 from pathlib import Path
 
+from django.conf import settings
 from django.core.files import File
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from portfolio.models import Client
 from assessments.models import Assessment
 from evidence.models import Evidence
@@ -10,13 +12,32 @@ from datetime import date
 
 
 class Command(BaseCommand):
-    help = "Seed the database with sample data"
+    help = "Seed the database with sample data (development only)"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--allow-production",
+            action="store_true",
+            help="Seed even when DJANGO_DEBUG is off.",
+        )
 
     def handle(self, *args, **options):
+        if not settings.DEBUG and not options["allow_production"]:
+            raise CommandError(
+                "Refusing to seed demo data with DJANGO_DEBUG off "
+                "(pass --allow-production to override)."
+            )
         if Client.objects.exists():
             self.stdout.write("Data already exists, skipping seed.")
             return
 
+        # All or nothing: a failure halfway must not leave a partial seed behind,
+        # because the "already exists" check above would then skip it forever.
+        with transaction.atomic():
+            self._seed()
+        self.stdout.write(self.style.SUCCESS("Seed data created successfully."))
+
+    def _seed(self):
         # Create clients
         client1 = Client.objects.create(
             name="Hartfield Manufacturing Ltd",
@@ -178,8 +199,6 @@ class Command(BaseCommand):
             content="",
             status="pending",
         )
-
-        self.stdout.write(self.style.SUCCESS("Seed data created successfully."))
 
     def _add_photos(self, assessment, photos):
         """Attach sample site photos, if the sample_evidence folder is mounted."""
