@@ -31,6 +31,9 @@ class InspectedUpload:
     text: str | None = None
 
 
+# PROPOSED (not built): malware scanning (e.g. ClamAV) before an upload is accepted,
+# HEIC conversion for iPhone photos (pillow-heif), and object storage (S3) with
+# short-lived signed download URLs.
 def inspect_upload(upload) -> InspectedUpload:
     limit = settings.EVIDENCE_MAX_UPLOAD_BYTES
     if upload.size > limit:

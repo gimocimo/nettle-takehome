@@ -164,6 +164,9 @@ class PostgresTaskBackendSender:
     """Sender for task signals emitted by the worker."""
 
 
+# PROPOSED (not built): wake workers instantly with Postgres LISTEN/NOTIFY (NOTIFY in
+# the enqueue transaction is delivered on commit) and keep polling only as a
+# fallback; the same channel could push live progress to browsers.
 def run_worker(queues=("default",), once=False):
     worker_id = f"{socket.gethostname()}-{os.getpid()}"
     stopping = threading.Event()

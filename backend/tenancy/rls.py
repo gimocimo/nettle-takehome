@@ -15,6 +15,9 @@ nettle_tenant, no BYPASSRLS). Docker dev logs in as the image's superuser for
 convenience, which is also what Nettle staff tooling (Django admin, migrations,
 seeding) uses as a deliberate, audited bypass.
 """
+# PROPOSED (not built): composite foreign keys, e.g. (organization_id, client_id) ->
+# client(organization_id, id), so the database itself guarantees a child row and its
+# parent share an organization (today: model save() checks + RLS WITH CHECK).
 from django.db import migrations
 
 TENANT_ROLE = "nettle_tenant"

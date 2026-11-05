@@ -14,6 +14,10 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+# PROPOSED (not built): a provider interface (Anthropic / OpenAI / Google, as Nettle
+# offers) chosen per organization, and regional routing for data residency: the
+# Claude API's inference_geo pins US vs global only, so EU-only inference would go
+# through an EU cloud region (Bedrock or Vertex AI) configured per deployment.
 class LLMError(Exception):
     """`transient` tells the job queue whether retrying later can help."""
 

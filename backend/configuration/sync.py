@@ -121,6 +121,11 @@ def _upsert_section(organization, spec, report):
     return section
 
 
+# PROPOSED (not built): template inheritance - an organization template declared as
+# "extends: <shared template>" plus a small list of changes (add, remove or rename
+# sections), so twenty customers who each want something slightly different don't
+# maintain twenty drifting copies. The section library already covers reuse;
+# inheritance would cover structure.
 def _upsert_template(organization, template_config, sections, report):
     language = template_config.language or organization.language
     data = {

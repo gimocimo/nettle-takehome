@@ -46,6 +46,12 @@ Rules:
 - Write every answer in {language}."""
 
 
+# PROPOSED (not built): a two-stage pipeline for large assessments. Each piece of
+# evidence is analysed once, at upload, into structured observations (hazard,
+# location, severity, quote), and sections are written from those observations.
+# It scales to hundreds of photos, shows findings per photo, and costs less per
+# report. Today every section call reads all evidence (cheap thanks to caching,
+# but bounded by the context window).
 class GenerationError(LLMError):
     pass
 

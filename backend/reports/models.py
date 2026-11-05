@@ -180,6 +180,9 @@ class Report(models.Model):
         return f"Report: {self.title or self.assessment.title}"
 
 
+# PROPOSED (not built): human review - PATCH an answer's value (ai_value stays as the
+# draft), mark sections reviewed, and "issue" the report once every answer is
+# reviewed, recording who approved what and when.
 class ReportAnswer(models.Model):
     """One answered question of a structured report.
 

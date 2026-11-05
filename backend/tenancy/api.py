@@ -13,6 +13,12 @@ from .db import activate_tenant
 from .models import Membership
 
 
+# PROPOSED (not built): token authentication next to sessions, for Nettle's mobile
+# apps and Open API (DRF TokenAuthentication or OAuth2 client credentials). Tenant
+# resolution already lives here rather than in Django middleware for that reason:
+# DRF authenticates tokens inside the view, so middleware would see an anonymous user.
+# PROPOSED (not built): SSO (SAML/OIDC, e.g. Entra ID) per organization, with
+# just-in-time membership provisioning.
 class OrganizationRequestMixin:
     """Base behaviour for every tenant endpoint.
 
