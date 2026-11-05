@@ -10,7 +10,12 @@ from ai.evidence import prepare_evidence, quote_is_verified
 from evidence.models import Evidence
 from nettle_core.testing import make_assessment, make_client, make_note, make_org
 
-SAMPLE_PDF = Path("/app/sample_evidence/Hazardous_Goods_Warehouse_Description_12.pdf")
+PDF_NAME = "Hazardous_Goods_Warehouse_Description_12.pdf"
+# Mounted at /app/sample_evidence in docker-compose; at the repository root in CI.
+SAMPLE_PDF = next(
+    (path for path in (Path("/app/sample_evidence") / PDF_NAME, Path(__file__).resolve().parents[3] / "sample_evidence" / PDF_NAME) if path.exists()),
+    Path("/missing") / PDF_NAME,
+)
 
 
 def _photo(assessment, size, orientation=None):
