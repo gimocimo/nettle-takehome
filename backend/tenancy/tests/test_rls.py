@@ -14,6 +14,9 @@ RLS_EXEMPT_TABLES = {
     # Read before a tenant is active (it decides which tenant to activate) and listed
     # across organizations by /api/auth/me/.
     "tenancy_membership",
+    # Workers claim jobs across tenants; rows hold ids only, and tasks re-enter the
+    # tenant scope themselves.
+    "jobs_job",
 }
 
 

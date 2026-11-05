@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "tenancy",
     "configuration",
     "ai",
+    "jobs",
     "portfolio",
     "assessments",
     "evidence",
@@ -127,6 +128,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 EVIDENCE_MAX_UPLOAD_BYTES = int(os.environ.get("EVIDENCE_MAX_UPLOAD_MB", "25")) * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Background jobs: Django's Tasks API backed by our own Postgres queue (see jobs/).
+TASKS = {"default": {"BACKEND": "jobs.backend.PostgresTaskBackend"}}
+JOBS_LEASE_SECONDS = int(os.environ.get("JOBS_LEASE_SECONDS", "120"))
+JOBS_MAX_ATTEMPTS = int(os.environ.get("JOBS_MAX_ATTEMPTS", "3"))
+JOBS_RETRY_BASE_SECONDS = int(os.environ.get("JOBS_RETRY_BASE_SECONDS", "30"))
+JOBS_POLL_SECONDS = float(os.environ.get("JOBS_POLL_SECONDS", "1"))
+# Fairness: at most this many running jobs per organization.
+JOBS_MAX_RUNNING_PER_ORG = int(os.environ.get("JOBS_MAX_RUNNING_PER_ORG", "2"))
 
 # Configuration as code: section library and per-organization configuration.
 TENANT_CONFIG_DIR = BASE_DIR / "tenant_config"
