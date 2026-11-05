@@ -15,12 +15,8 @@ from tenancy.models import Membership, Organization
 # Development-only credentials, documented in the README. Never used outside DEBUG.
 DEMO_PASSWORD = "nettle-demo-2026"
 
-ORGANIZATIONS = [
-    # slug, name, language, currency
-    ("default-insurer", "Default Insurer", "en-GB", "GBP"),
-    ("customer-a", "Customer A", "en-GB", "EUR"),
-    ("customer-b", "Customer B", "en-GB", "GBP"),
-]
+# Organizations themselves are configuration (tenant_config/, applied by sync_config).
+ORGANIZATIONS = ["default-insurer", "customer-a", "customer-b"]
 
 USERS = [
     # email, first name, {organization slug: role}
@@ -57,7 +53,10 @@ class Command(BaseCommand):
                 "Refusing to seed demo data with DJANGO_DEBUG off "
                 "(pass --allow-production to override)."
             )
-        if Organization.objects.filter(slug__in=[org[0] for org in ORGANIZATIONS]).exists():
+        orgs = {org.slug: org for org in Organization.objects.filter(slug__in=ORGANIZATIONS)}
+        if len(orgs) != len(ORGANIZATIONS):
+            raise CommandError("Run `manage.py sync_config` first: organizations are configuration.")
+        if get_user_model().objects.filter(username=USERS[0][0]).exists():
             self.stdout.write("Demo data already exists, skipping seed.")
             return
 
@@ -65,17 +64,13 @@ class Command(BaseCommand):
         # because the "already exists" check above would then skip it forever.
         # Runs without a tenant context: seeding is a privileged, cross-tenant operation.
         with transaction.atomic():
-            orgs = self._seed_organizations_and_users()
+            self._seed_users(orgs)
             self._seed_default_insurer(orgs["default-insurer"])
             self._seed_customer_a(orgs["customer-a"])
             self._seed_customer_b(orgs["customer-b"])
         self.stdout.write(self.style.SUCCESS("Seed data created successfully."))
 
-    def _seed_organizations_and_users(self):
-        orgs = {
-            slug: Organization.objects.create(slug=slug, name=name, language=language, currency=currency)
-            for slug, name, language, currency in ORGANIZATIONS
-        }
+    def _seed_users(self, orgs):
         User = get_user_model()
         for email, first_name, roles in USERS:
             user = User.objects.create_user(
@@ -87,7 +82,6 @@ class Command(BaseCommand):
         User.objects.create_superuser(
             username="staff@nettle.test", email="staff@nettle.test", password=DEMO_PASSWORD
         )
-        return orgs
 
     def _seed_default_insurer(self, organization):
         client1 = Client.objects.create(

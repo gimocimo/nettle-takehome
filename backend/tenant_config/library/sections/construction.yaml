@@ -1,0 +1,18 @@
+key: construction
+title: Construction
+guidance: The "C" of COPE.
+questions:
+  - key: construction_summary
+    prompt: Describe the building construction - frame, walls, roof, floor area and height.
+    type: long_text
+  - key: construction_class
+    prompt: Predominant construction class.
+    type: choice
+    options: [Non-combustible, Limited combustible, Combustible, Mixed]
+  - key: combustible_insulation
+    prompt: Are combustible insulated panels or combustible roof insulation present?
+    type: choice
+    options: ["Yes", "No"]
+  - key: compartmentation
+    prompt: Describe fire compartmentation and separation between areas.
+    type: long_text

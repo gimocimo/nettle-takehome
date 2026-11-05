@@ -1,0 +1,9 @@
+key: structural
+title: Structural condition
+questions:
+  - key: structural_condition
+    prompt: Describe the condition of the structure, cladding and roof, including defects observed.
+    type: long_text
+  - key: maintenance
+    prompt: Describe maintenance arrangements and any outstanding repairs.
+    type: long_text

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "tenancy",
+    "configuration",
     "portfolio",
     "assessments",
     "evidence",
@@ -125,6 +126,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 EVIDENCE_MAX_UPLOAD_BYTES = int(os.environ.get("EVIDENCE_MAX_UPLOAD_MB", "25")) * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Configuration as code: section library and per-organization configuration.
+TENANT_CONFIG_DIR = BASE_DIR / "tenant_config"
 
 LOGGING = {
     "version": 1,

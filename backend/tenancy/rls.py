@@ -40,13 +40,18 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {T
 _CURRENT_ORG = f"NULLIF(current_setting('{ORGANIZATION_SETTING}', true), '')::uuid"
 
 
-def enable_rls(table):
-    """Migration operation: protect one tenant table with the isolation policy."""
+def enable_rls(table, shared_rows=False):
+    """Migration operation: protect one tenant table with the isolation policy.
+
+    shared_rows: rows with a NULL organization (e.g. Nettle's shared section library)
+    are readable by every tenant, but tenants can only write their own rows.
+    """
+    readable = f"organization_id IS NULL OR organization_id = {_CURRENT_ORG}" if shared_rows else f"organization_id = {_CURRENT_ORG}"
     return migrations.RunSQL(
         sql=f"""
             ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;
             CREATE POLICY tenant_isolation ON {table}
-                USING (organization_id = {_CURRENT_ORG})
+                USING ({readable})
                 WITH CHECK (organization_id = {_CURRENT_ORG});
         """,
         reverse_sql=f"""

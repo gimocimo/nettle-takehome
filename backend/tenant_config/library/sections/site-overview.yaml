@@ -1,0 +1,9 @@
+key: site-overview
+title: Site overview
+questions:
+  - key: site_description
+    prompt: Describe the site - location, buildings, size and main activities.
+    type: long_text
+  - key: operations
+    prompt: Describe operations - processes, operating hours and staffing, where known.
+    type: long_text

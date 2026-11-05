@@ -1,0 +1,23 @@
+key: fire-protection
+title: Fire protection
+guidance: >
+  The "P" of COPE. Judge adequacy against the occupancy, storage height and
+  commodity, citing the design standard where the evidence names one.
+questions:
+  - key: sprinkler_coverage
+    prompt: How much of the site is protected by automatic sprinklers?
+    type: choice
+    options: [Full, Partial, None]
+  - key: sprinkler_adequacy
+    prompt: Is the sprinkler design adequate for the occupancy, storage arrangement and commodity?
+    type: long_text
+  - key: water_supply
+    prompt: Describe the water supply (pumps, tanks, capacity) and whether it meets the demand.
+    type: long_text
+  - key: detection_and_alarm
+    prompt: Describe fire detection and alarm systems and their maintenance and testing.
+    type: long_text
+  - key: protection_rating
+    prompt: Overall adequacy of fire protection.
+    type: rating
+    options: [Adequate, Partially adequate, Inadequate]

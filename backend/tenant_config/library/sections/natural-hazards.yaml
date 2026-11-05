@@ -1,0 +1,10 @@
+key: natural-hazards
+title: Natural hazards
+questions:
+  - key: natural_hazard_exposures
+    prompt: Describe flood, earthquake, windstorm and other natural hazard exposures, and the mitigation in place.
+    type: long_text
+  - key: natural_hazard_rating
+    prompt: Overall natural hazard exposure.
+    type: rating
+    options: [Low, Moderate, High]

@@ -1,0 +1,16 @@
+# Standard configuration: the reference setup every new customer starts from.
+organization:
+  slug: default-insurer
+  name: Default Insurer
+  language: en-GB
+  currency: GBP
+
+report_templates:
+  - key: standard-risk-report
+    name: Standard risk report
+    description: The structure Nettle generated as free text before templates existed.
+    sections: [executive-summary, site-overview, fire-protection, structural, electrical, recommendations]
+  - key: property-cope-survey
+    name: Property survey (COPE)
+    description: Construction, Occupancy, Protection and Exposure - the standard property underwriting frame.
+    sections: [executive-summary, site-and-exposure, construction, occupancy, fire-protection, natural-hazards, recommendations]

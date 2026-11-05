@@ -1,0 +1,14 @@
+key: site-and-exposure
+title: Location and external exposures
+guidance: The "E" of COPE.
+questions:
+  - key: location
+    prompt: Describe the location and surroundings (neighbouring occupancies, access, distances).
+    type: long_text
+  - key: external_exposures
+    prompt: Which external hazards affect the site (neighbouring buildings, flood, earthquake, windstorm, arson)?
+    type: long_text
+  - key: exposure_level
+    prompt: Overall level of external exposure.
+    type: rating
+    options: [Low, Moderate, High]

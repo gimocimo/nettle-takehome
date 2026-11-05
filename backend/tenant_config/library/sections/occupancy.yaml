@@ -1,0 +1,17 @@
+key: occupancy
+title: Occupancy and storage
+guidance: The "O" of COPE.
+questions:
+  - key: activities
+    prompt: Describe the activities carried out at the site.
+    type: long_text
+  - key: storage_arrangement
+    prompt: Describe storage - method (racks, solid piled, flow-through), heights, commodities and packaging.
+    type: long_text
+  - key: hazardous_materials
+    prompt: Which hazardous materials (flammable liquids, aerosols, gases) are present, in what quantities, and how are they stored?
+    type: long_text
+  - key: occupancy_hazard
+    prompt: Occupancy hazard classification.
+    type: rating
+    options: [Low, Ordinary, High, Extra high]

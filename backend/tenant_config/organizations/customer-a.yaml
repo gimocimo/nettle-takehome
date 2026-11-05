@@ -1,0 +1,11 @@
+# An Italian insurer: COPE surveys only, reports written in Italian.
+organization:
+  slug: customer-a
+  name: Customer A
+  language: it-IT
+  currency: EUR
+
+report_templates:
+  - key: property-cope-survey
+    name: Property survey (COPE)
+    sections: [executive-summary, site-and-exposure, construction, occupancy, fire-protection, natural-hazards, recommendations]

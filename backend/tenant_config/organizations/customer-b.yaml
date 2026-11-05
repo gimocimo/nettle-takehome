@@ -1,0 +1,26 @@
+# A corporate running its own site safety reviews: no insurance concepts, and its
+# own summary section with an internal rating scale.
+organization:
+  slug: customer-b
+  name: Customer B
+  language: en-GB
+  currency: GBP
+
+sections:
+  - key: safety-summary
+    title: Safety summary
+    guidance: For the site's management team. Base it on the other sections' answers.
+    synthesis: true
+    questions:
+      - key: summary
+        prompt: Summarise the site's safety position in one or two paragraphs.
+        type: long_text
+      - key: overall_assessment
+        prompt: Overall assessment against the company's safety standard.
+        type: rating
+        options: [Acceptable, Improvement needed, Unacceptable]
+
+report_templates:
+  - key: site-safety-review
+    name: Site safety review
+    sections: [safety-summary, site-overview, housekeeping-and-hot-work, electrical, fire-protection, recommendations]

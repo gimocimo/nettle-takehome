@@ -1,0 +1,17 @@
+key: executive-summary
+title: Executive summary
+guidance: >
+  Written for an underwriter who will read only this section. Base it on the other
+  sections' answers; do not introduce facts that are not supported there.
+synthesis: true
+questions:
+  - key: summary
+    prompt: Summarise the site's risk profile in one or two paragraphs.
+    type: long_text
+  - key: key_findings
+    prompt: List the most significant risk findings, most important first.
+    type: long_text
+  - key: overall_risk_rating
+    prompt: Overall risk rating for the site.
+    type: rating
+    options: [Low, Medium, High, Critical]

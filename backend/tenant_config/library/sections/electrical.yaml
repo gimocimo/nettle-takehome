@@ -1,0 +1,13 @@
+key: electrical
+title: Electrical systems
+questions:
+  - key: electrical_condition
+    prompt: Describe the condition of electrical installations and their inspection history.
+    type: long_text
+  - key: thermography
+    prompt: Has a thermographic (infrared) survey been carried out in the last 12 months?
+    type: choice
+    options: ["Yes", "No"]
+  - key: electrical_hazards
+    prompt: Describe electrical hazards observed (damaged equipment, extension leads, charging areas).
+    type: long_text

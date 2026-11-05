@@ -1,0 +1,13 @@
+key: housekeeping-and-hot-work
+title: Housekeeping and hot work
+questions:
+  - key: housekeeping
+    prompt: Describe housekeeping - waste, combustible accumulations, clear aisles and exits.
+    type: long_text
+  - key: hot_work_controls
+    prompt: Describe hot work and ignition source controls (permits, smoking, charging areas).
+    type: long_text
+  - key: housekeeping_rating
+    prompt: Overall standard of housekeeping.
+    type: rating
+    options: [Good, Fair, Poor]

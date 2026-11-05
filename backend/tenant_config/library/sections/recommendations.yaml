@@ -1,0 +1,10 @@
+key: recommendations
+title: Risk improvement recommendations
+guidance: >
+  One recommendation per distinct issue, each tied to the observation that motivates
+  it. Prioritise by the loss it could prevent. Do not invent issues the evidence
+  does not show.
+questions:
+  - key: recommendations
+    prompt: List the risk improvement recommendations.
+    type: recommendations
