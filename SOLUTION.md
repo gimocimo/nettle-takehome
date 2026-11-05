@@ -29,6 +29,12 @@ corporates. Engineers collect evidence on site, the AI drafts findings and
 recommendations, and a senior engineer reviews and approves them. Today every
 customer runs on a dedicated deployment, which is what challenge 4 asks to change.
 
+**Where I think the difficulty is.** Generating a report is now the easy part. The
+hard parts are trust (an underwriter has to be able to check every statement
+against the evidence) and one product that each customer can bend to its own way of
+working without a fork. Challenge 1 is mostly about the first; challenges 2 to 4 are
+about the second.
+
 **The word "client" means two things in the brief.** `portfolio.Client` is an insured
 business inside a portfolio. In challenges 2-4 a "client" is Nettle's *customer*: the
 tenant. I called the tenant **Organization** and left `Client` alone.
@@ -465,6 +471,27 @@ What the output shows:
 - **The estimate holds up.** The model picker estimated $0.27 for a run that cost
   $0.29, with output calibrated on the organization's 14 previous sections.
 
+## Looking back
+
+**The decision I'm proudest of: making the AI show its work.** Every answer cites the
+evidence it relies on, quotes are checked by the server instead of trusted, and
+"insufficient evidence" is a valid answer that names what is missing. The check is a
+few lines of deterministic code, yet it changes the reviewer's job from re-reading
+everything to checking what is flagged, and it turns the AI's gaps into a request
+list for the next site visit. In the Italian run, all 69 quotes checked out against
+the source PDF.
+
+**The decision I'm least sure of: sending all the evidence with every section.** It
+keeps the pipeline simple and, with prompt caching, cheap ($0.29 for a seven-section
+report). But its cost grows with the evidence, not with the question: an assessment
+with hundreds of photos would hit context and cost limits, and every section re-reads
+photos that are irrelevant to it. The two-stage pipeline (analyse each upload once,
+then write from the observations) is the fix; I held it back because a new stage
+needs its own evaluation first. A close second is configuration as code: reviewed
+YAML is right while Nettle's engineers onboard each customer, but once customers want
+to adjust their own templates it needs an editor in the product, with the same
+validation behind it.
+
 ## What I'd do next
 
 1. An evaluation set from real surveys, run in CI on every prompt or template change
@@ -479,16 +506,39 @@ What the output shows:
 5. The two-stage evidence pipeline for large assessments.
 6. Regions and the migration path from per-customer deployments.
 
+**My first two weeks, if I joined.** In the first week, I'd follow a real survey from
+site visit to issued report with a risk engineer and an underwriter, to see where
+time and trust are lost today, and start the evaluation set from surveys already
+issued, so that every later change to prompts or templates is measured rather than
+judged by eye. In the second, I'd turn this design into a plan for the live system:
+which dedicated deployments move into the shared one first, the data migration and
+rollback for one low-risk customer, and the monitoring that must exist before it
+(cost per report, failed generations, isolation alerts).
+
 ## How I used AI
 
-I used Claude Code throughout, as Nettle expects. I first had it review the brief,
-the codebase and Nettle's public site, then **discussed the plan before any code**:
-an essential version of all four challenges, with alternatives for each design
-decision that I chose between (organization in the URL, row-level security,
-configuration as code, the section library, a Postgres queue behind the Tasks API,
-fairness, webhooks, budgets). It then implemented commit by commit, with a test in
-each commit. I reviewed the changes as they landed, and the history is the real
-order of work, including the bugs we found along the way (the isolation suite caught
-a broken route; the first live run showed prompt caching wasn't hitting, which we
-then proved with a controlled experiment and fixed, measuring the saving). Commits
-carry a `Co-Authored-By` trailer.
+I used Claude Code throughout, as Nettle expects, and treated it as a fast pair
+rather than an oracle.
+
+- **What I delegated.** Reviewing the brief, the codebase and Nettle's public site;
+  laying out alternatives for each design decision; then the implementation, commit
+  by commit with tests, and the live runs against the Claude API. It also helped
+  draft this document.
+- **What I decided and checked myself.** No code until the plan was agreed: an
+  essential version of all four challenges first, then increments. I chose between
+  the alternatives for each decision (organization in the URL, row-level security
+  now, configuration as code, the section library, a Postgres queue behind the Tasks
+  API, per-organization fairness, signed webhooks, budgets), and accepted Opus as the
+  default model only with the model configurable and a cost estimate for each. I set
+  the three-hour timebox and the rule that anything after it is labelled bonus. I
+  reviewed the changes as they landed and used the platform myself with every demo
+  login, questioning what I saw.
+- **Where I redirected it.** I asked for options rather than a single
+  recommendation; before agreeing to more features, I asked for a plain list of what
+  was still missing against the agreed plan; and I kept my API key out of the
+  conversation by entering it in a local dialog that wrote it straight to `.env`.
+
+The history is the real order of work, including the bugs found along the way: the
+isolation suite caught a broken route, and the first live run showed prompt caching
+wasn't hitting, which we proved with a controlled experiment, fixed and measured
+($0.52 to $0.29 per report). Commits carry a `Co-Authored-By` trailer.
