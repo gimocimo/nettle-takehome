@@ -1,10 +1,18 @@
+import uuid
+from types import SimpleNamespace
+
 import pytest
 from django.core.management import call_command
+from django.db import connection
+from django.tasks import TaskResultStatus
+from django.test.utils import CaptureQueriesContext
 
 from ai.testing import FakeLLM
 from nettle_core.testing import drain_jobs, make_assessment, make_client, make_note, org_url
 from reports.generation import generate_report
 from reports.models import Report, ReportAnswer, ReportTemplate
+from reports.signals import finalize_failed_generation
+from reports.tasks import generate_report_task
 from tenancy.models import Membership, Organization
 
 
@@ -105,3 +113,38 @@ def test_issued_reports_and_unknown_sections_cannot_be_regenerated(setup):
     engineer.post(org_url(org, f"reports/{report.id}/issue/"))
     locked = engineer.post(org_url(org, f"reports/{report.id}/regenerate/"), {"section": "fire-protection"}, format="json")
     assert locked.status_code == 400
+
+
+def test_status_changes_lock_the_report_row(setup):
+    # Concurrent actions on one report (a double click, issue against regenerate) wait
+    # on this lock and re-check the status, instead of acting on the same stale read.
+    org, report, engineer = setup
+    with CaptureQueriesContext(connection) as queries:
+        assert engineer.post(org_url(org, f"reports/{report.id}/issue/")).status_code == 200
+    assert any('FOR UPDATE OF "reports_report"' in query["sql"] for query in queries.captured_queries)
+
+
+def test_a_stale_job_cannot_touch_an_issued_report(setup):
+    org, report, engineer = setup
+    engineer.post(org_url(org, f"reports/{report.id}/issue/"))
+    generate_report_task.enqueue(organization_id=str(org.id), report_id=str(report.id))  # e.g. a duplicate
+    drain_jobs()
+    report.refresh_from_db()
+    assert report.status == "issued"
+
+
+def _failed_generation(org, report_id):
+    return SimpleNamespace(
+        task=SimpleNamespace(name="generate_report_task"),
+        status=TaskResultStatus.FAILED,
+        kwargs={"organization_id": str(org.id), "report_id": str(report_id)},
+    )
+
+
+def test_a_failing_job_cannot_fail_an_issued_or_deleted_report(setup):
+    org, report, engineer = setup
+    engineer.post(org_url(org, f"reports/{report.id}/issue/"))
+    finalize_failed_generation(sender=None, task_result=_failed_generation(org, report.id))
+    report.refresh_from_db()
+    assert report.status == "issued"
+    finalize_failed_generation(sender=None, task_result=_failed_generation(org, uuid.uuid4()))  # deleted: no error

@@ -35,6 +35,14 @@ class ReportViewSet(OrganizationScopedViewSet):
     queryset = Report.objects.select_related("assessment", "template").all()
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
+    def _locked_report(self):
+        """The report, row-locked until the request's transaction ends. Status changes
+        (retry, regenerate, edit, issue, delete) on one report then run one after the
+        other, each re-checking the status the previous one left: a double click
+        can't queue two paid generations, and nothing slips past an issue."""
+        report = self.get_object()  # scoping and permissions
+        return self.get_queryset().select_for_update(of=("self",)).get(pk=report.pk)
+
     def get_serializer_class(self):
         if self.action == "list":
             return ReportListSerializer
@@ -99,7 +107,7 @@ class ReportViewSet(OrganizationScopedViewSet):
     @action(detail=True, methods=["post"])
     def retry(self, request, pk=None, **kwargs):
         """Resume a failed generation from the last completed section."""
-        report = self.get_object()
+        report = self._locked_report()
         if report.status != "failed":
             raise ValidationError("Only failed reports can be retried.")
         report.status, report.error_message, report.finished_at = "queued", "", None
@@ -115,7 +123,7 @@ class ReportViewSet(OrganizationScopedViewSet):
     )
     def edit_answer(self, request, pk=None, section_key=None, question_key=None, **kwargs):
         """An engineer corrects or completes an answer. The AI's draft (ai_value) is kept."""
-        report = self.get_object()
+        report = self._locked_report()  # an edit can't land after the report is issued
         if report.status != "completed":
             raise ValidationError("Only completed reports that haven't been issued can be edited.")
         answer = get_object_or_404(report.answers, section_key=section_key, question_key=question_key)
@@ -136,7 +144,7 @@ class ReportViewSet(OrganizationScopedViewSet):
     @action(detail=True, methods=["post"])
     def issue(self, request, pk=None, **kwargs):
         """Approve the report: it becomes final and locked."""
-        report = self.get_object()
+        report = self._locked_report()
         if report.status != "completed":
             raise ValidationError("Only completed reports can be issued.")
         report.status, report.issued_by, report.issued_at = "issued", request.user, timezone.now()
@@ -158,7 +166,7 @@ class ReportViewSet(OrganizationScopedViewSet):
         """Regenerate one section from the assessment's current evidence (e.g. after a
         photo of the pump room was added), plus the synthesis sections that summarise
         it. Every other section, engineers' edits included, stays as it is."""
-        report = self.get_object()
+        report = self._locked_report()
         if report.status != "completed":
             raise ValidationError("Only completed reports that haven't been issued can be regenerated.")
         specs = {section.key: section.spec for section in report.template.ordered_sections()}

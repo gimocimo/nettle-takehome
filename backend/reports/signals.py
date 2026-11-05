@@ -16,8 +16,14 @@ def finalize_failed_generation(sender, task_result, **kwargs):
         return
     organization = Organization.objects.get(pk=task_result.kwargs["organization_id"])
     with tenant_transaction(organization):
-        report = Report.objects.get(pk=task_result.kwargs["report_id"])
-        if report.status == "completed":
+        # Only a report still waiting or generating can fail: a completed, issued,
+        # already failed or deleted one is left as it is.
+        report = (
+            Report.objects.select_for_update()
+            .filter(pk=task_result.kwargs["report_id"], status__in=["queued", "generating"])
+            .first()
+        )
+        if report is None:
             return
         report.status = "failed"
         report.finished_at = timezone.now()

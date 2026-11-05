@@ -1,3 +1,5 @@
+import logging
+
 from django.tasks import task
 from django.utils import timezone
 
@@ -12,6 +14,8 @@ from webhooks.events import emit, report_event_data
 from .generation import generate_report
 from .models import Report
 
+logger = logging.getLogger(__name__)
+
 
 @task(takes_context=True)
 def generate_report_task(context, *, organization_id, report_id):
@@ -20,24 +24,32 @@ def generate_report_task(context, *, organization_id, report_id):
     receiver (reports.signals), which also covers workers that died mid-task."""
     organization = Organization.objects.get(pk=organization_id)
     with tenant_transaction(organization):
-        Report.objects.filter(pk=report_id).update(
+        # Each transition names the status it expects, so a stale or duplicate job
+        # can't touch a report that was finished, issued, failed or deleted meanwhile.
+        # "generating" is expected too: a crashed worker's job resumes its own run.
+        started = Report.objects.filter(pk=report_id, status__in=["queued", "generating"]).update(
             status="generating", error_message="", started_at=timezone.now()
         )
+    if not started:
+        logger.info("Report %s is no longer waiting to be generated; skipping.", report_id)
+        return
     try:
         generate_report(report_id)
     except Exception as exc:
         retrying = will_retry(exc, context.attempt)
         message = str(exc) if isinstance(exc, LLMError) else "Report generation failed unexpectedly."
         with tenant_transaction(organization):
-            Report.objects.filter(pk=report_id).update(
+            Report.objects.filter(pk=report_id, status="generating").update(
                 status="queued" if retrying else "generating",
                 error_message=f"{message} Retrying automatically." if retrying else message,
             )
         raise
     with tenant_transaction(organization):
-        Report.objects.filter(pk=report_id).update(
+        completed = Report.objects.filter(pk=report_id, status="generating").update(
             status="completed", current_section="", finished_at=timezone.now()
         )
+        if not completed:
+            return
         report = Report.objects.select_related("requested_by").get(pk=report_id)
         notify(
             user=report.requested_by,
