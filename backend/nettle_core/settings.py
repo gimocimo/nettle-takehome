@@ -110,6 +110,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Reject oversized evidence early. A reverse proxy in front of Django should enforce the
+# same limit (e.g. nginx client_max_body_size) so huge bodies never reach the app.
+EVIDENCE_MAX_UPLOAD_BYTES = int(os.environ.get("EVIDENCE_MAX_UPLOAD_MB", "25")) * 1024 * 1024
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGGING = {

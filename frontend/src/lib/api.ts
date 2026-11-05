@@ -35,14 +35,17 @@ export async function apiDelete(path: string) {
   if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
 }
 
-export function apiUpload(path: string, formData: FormData) {
-  return fetch(`${API_BASE}${path}`, {
+export async function apiUpload(path: string, formData: FormData) {
+  const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     body: formData,
-  }).then((r) => {
-    if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
-    return r.json();
   });
+  if (!res.ok) {
+    // Surface the server's validation message (e.g. unsupported file type).
+    const text = await res.text();
+    throw new Error(`Upload failed (${res.status}): ${text}`);
+  }
+  return res.json();
 }
 
 export { API_BASE };

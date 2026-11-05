@@ -57,14 +57,15 @@ export default function AssessmentDetailPage() {
     formData.append("file", file);
     formData.append("assessment", id as string);
     formData.append("title", file.name);
-    formData.append(
-      "evidence_type",
-      file.type.startsWith("image/") ? "image" : "document"
-    );
 
-    await apiUpload("/api/evidence/", formData);
-    apiFetch(`/api/evidence/?assessment=${id}`).then(setEvidence);
-    e.target.value = "";
+    try {
+      await apiUpload("/api/evidence/", formData);
+      apiFetch(`/api/evidence/?assessment=${id}`).then(setEvidence);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const handleAddNote = async () => {
@@ -166,7 +167,7 @@ export default function AssessmentDetailPage() {
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.txt,.md"
                 />
               </label>
             </div>
