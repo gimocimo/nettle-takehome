@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: nettle
+      POSTGRES_USER: nettle
+      POSTGRES_PASSWORD: nettle
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nettle"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py seed_data &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./sample_evidence:/app/sample_evidence:ro
+      - media_data:/app/media
+    environment:
+      DATABASE_URL: postgres://nettle:nettle@db:5432/nettle
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-sk-ant-placeholder}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  media_data:
