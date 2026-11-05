@@ -34,7 +34,9 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      target: development
     command: >
       sh -c "python manage.py migrate &&
              python manage.py sync_config &&
@@ -56,7 +58,9 @@ services:
 
   # Runs background jobs (report generation). Scale with `docker compose up --scale worker=3`.
   worker:
-    build: ./backend
+    build:
+      context: ./backend
+      target: development
     command: python manage.py run_worker
     volumes: *backend-volumes
     environment: *backend-environment
@@ -66,7 +70,9 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: development
     ports:
       - "3000:3000"
     volumes:
