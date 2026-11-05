@@ -174,10 +174,11 @@ def run_worker(queues=("default",), once=False):
     while not stopping.is_set():
         try:
             job = claim_job(worker_id, queues)
-        except DatabaseError:
-            logger.exception("Could not claim a job (database not ready?)")
+        except DatabaseError as exc:
+            logger.warning("Could not claim a job, retrying shortly: %s", str(exc).splitlines()[0])
             connection.close()
-            job = None
+            time.sleep(5)
+            continue
         if job is not None:
             execute(job)
         elif once:
