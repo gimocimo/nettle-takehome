@@ -8,7 +8,8 @@ language, AI model and budget.
 
 **For the take-home write-up see [SOLUTION.md](SOLUTION.md).** Fixes made after the
 deadline are listed in [ERRATA.md](ERRATA.md), and a bonus
-[model benchmark](docs/benchmark.md) compares Opus, Sonnet and Haiku.
+[model benchmark](docs/benchmark.md) compares Opus, Sonnet and Haiku at two
+reasoning efforts.
 
 ## Screenshots
 

@@ -3,6 +3,7 @@
     {
       "case": "default-insurer",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "report_id": "315e38e7-8ba2-4402-95f2-8d16b5e71a49",
       "status": "completed",
       "error": "",
@@ -21,20 +22,62 @@
       "quotes_verified": 36,
       "recommendations": 4,
       "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.01762,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Only photos are cited, and they can't be checked. No text describes the construction materials."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and accumulated cardboard and shrink-wrap debris support a high-hazard occupancy. The flammable-liquid IBCs appear only in an unseen photo, so Extra high cannot be ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "A sprinkler system is present but its branch lines are corroded in the south section. That fits partial adequacy better than either Adequate or Inadequate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Sprinkler corrosion and missing leak detection despite prior water claims point to elevated risk. Neither rules out Medium or clearly establishes High over Critical."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-opus-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 106,
         "cost_usd": 0.275699,
         "answered": 12,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.01762
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "report_id": "72fc54ac-999b-4374-af8d-0c81af9d126f",
       "status": "completed",
       "error": "",
@@ -62,7 +105,7 @@
             "matched_recommendations": [
               1
             ],
-            "reason": "Survey item 1 covers the high rack storage under the 14.7 m ceiling. It states that ceiling-only sprinklers cannot protect flammable liquids and aerosols at that height and asks to adapt the sprinkler concept to the stored goods."
+            "reason": "Survey recommendation 1 covers the 14.7 m high-rack area and states there is no ceiling-only solution for flammable liquids and aerosols. It asks to adapt the sprinkler concept to the stored goods."
           },
           {
             "expert_item": 2,
@@ -70,7 +113,7 @@
             "matched_recommendations": [
               5
             ],
-            "reason": "Survey item 5 limits solid-piled ignitable liquids in the buffer areas under the 9.1 m ceiling to 1.5 m per FM 7-29. As an alternative it asks to adapt the storage and sprinkler concept, matching the expert action."
+            "reason": "Survey recommendation 5 limits solid-pile stacks of ignitable liquids to 1.5 m under the 9.1 m ceiling per FM 7-29, or adapting the storage and sprinkler concept."
           },
           {
             "expert_item": 3,
@@ -78,7 +121,7 @@
             "matched_recommendations": [
               6
             ],
-            "reason": "Survey item 6 sets the same container limits for flow-through racks (60 ml, 4 l if water-miscible). It also calls for a horizontal solid barrier under Scheme A per FM 7-29."
+            "reason": "Survey recommendation 6 sets the same container limits (60 ml, or 4 l if water-miscible) and calls for a horizontal barrier, Scheme A."
           },
           {
             "expert_item": 4,
@@ -86,7 +129,7 @@
             "matched_recommendations": [
               4
             ],
-            "reason": "Survey item 4 keeps aerosols above Level 1 segregated, with vertical flue barriers and a solid barrier every second rack level. It also reserves dedicated rooms with adequate sprinklers for Level 2-3."
+            "reason": "Survey recommendation 4 asks for segregation above NFPA 30B Level 1, vertical barriers in the flue space, horizontal barriers every second rack level, and dedicated rooms for Level 2-3."
           },
           {
             "expert_item": 5,
@@ -94,7 +137,7 @@
             "matched_recommendations": [
               8
             ],
-            "reason": "Survey item 8 asks for seismic bracing of sprinkler piping, earthquake design of the tanks and anchoring of racks to the floor, as the expert does."
+            "reason": "Survey recommendation 8 covers bracing the sprinkler piping, seismic design of the tanks, and anchoring the racks to the floor."
           }
         ],
         "unmatched_recommendations": [
@@ -104,22 +147,88 @@
           9,
           10
         ],
-        "judge_cost_usd": 0.027796
+        "judge_cost_usd": 0.026776
+      },
+      "support": {
+        "supported": 4,
+        "partial": 4,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.030732,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone, sprinklers impaired after a quake and possible river flooding point towards elevated exposure. But the flood risk is only 'possible', and nothing covers neighbouring properties, so Moderate is not ruled out."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls, reinforced concrete columns and a non-combustible insulated steel deck clearly indicate non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck is described as non-combustible insulated. However, the recommendation to use non-combustible materials and insulation hints that combustible materials may exist somewhere, so 'Yes' is not ruled out."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Stored Class IA ethanol, with no ceiling-only sprinkler solution available and a fire that cannot be controlled, justifies Extra high."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "Both the northern and southern sections are described as sprinklered, which is consistent with Full. The quotes don't confirm that every area of the site is covered, so Partial is not excluded."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "Multiple quotes state the protection is inadequate and that a fire cannot be controlled by the installed system."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "supported",
+            "reason": "An active earthquake zone requiring earthquake-resistant sprinkler tanks supports a High natural hazard exposure."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "An uncontrollable fire scenario and inadequately protected high-rack storage indicate severe risk, but they don't distinguish Critical from High."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-opus-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 173,
         "cost_usd": 0.532172,
         "answered": 20,
         "recommendations": 10,
-        "recall": 1.0
+        "recall": 1.0,
+        "support": {
+          "supported": 4,
+          "partial": 4,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.030732
+        }
       }
     },
     {
       "case": "default-insurer",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "report_id": "20e4cf51-a680-4ffd-8c78-b0916f40030c",
       "status": "completed",
       "error": "",
@@ -138,20 +247,62 @@
       "quotes_verified": 29,
       "recommendations": 4,
       "failed_calls": 1,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.01926,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Only photos are cited, and I can't see them. No text describes the building's construction materials."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and combustible packaging debris point to an elevated hazard. Without commodity details, the quotes don't separate 'Extra high' from 'High'."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "partial",
+            "reason": "A sprinkler system is present but its branch lines are corroded, and generator testing is overdue. That fits 'Partially adequate', but with 40ft racking and the condition of the in-rack sprinklers unknown, 'Inadequate' isn't ruled out."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "supported",
+            "reason": "The quotes show several significant deficiencies: high-piled storage, corroded sprinklers, poor housekeeping, and no leak detection despite previous water damage claims. That justifies 'High' over 'Medium', and with sprinklers still present, nothing points to 'Critical'."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-sonnet-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 48,
         "cost_usd": 0.120711,
         "answered": 10,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.01926
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "report_id": "07263139-5277-4aed-bad9-1af7cfc841fc",
       "status": "completed",
       "error": "",
@@ -179,7 +330,7 @@
             "matched_recommendations": [
               1
             ],
-            "reason": "Same hazard (flammable liquids/aerosols in 14.7 m high racks, no ceiling-only solution) and same action: adapt the sprinkler concept to the stored goods."
+            "reason": "Same hazard (flammable liquids/aerosols at 14.7 m, no ceiling-only solution) and same action: adapt the sprinkler concept to the stored goods."
           },
           {
             "expert_item": 2,
@@ -187,7 +338,7 @@
             "matched_recommendations": [
               4
             ],
-            "reason": "Asks to limit solid-piled buffer stacks under the 9.1 m ceiling to 1.5 m per FM 7-29, or to adapt the storage and sprinkler concept."
+            "reason": "Limits solid piles under the 9.1 m ceiling to 1.5 m per FM 7-29, or adapts the storage and sprinkler concept."
           },
           {
             "expert_item": 3,
@@ -195,7 +346,7 @@
             "matched_recommendations": [
               5
             ],
-            "reason": "Same container limits (60 ml; 4 l if miscible) and Scheme A with a horizontal solid barrier for the flow-through racks."
+            "reason": "Same container limits (60 ml / 4 l) and Scheme A with a horizontal solid barrier."
           },
           {
             "expert_item": 4,
@@ -203,7 +354,7 @@
             "matched_recommendations": [
               2
             ],
-            "reason": "Same segregation measures: vertical flue barrier, solid barrier every second level, and dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+            "reason": "Same segregation measures: vertical flue barrier, a barrier every second level, and dedicated rooms for Level 2-3 aerosols."
           },
           {
             "expert_item": 5,
@@ -211,7 +362,7 @@
             "matched_recommendations": [
               8
             ],
-            "reason": "Same three actions: brace sprinkler piping, design tanks for earthquakes, and anchor racks to the ground."
+            "reason": "Covers bracing the sprinkler piping, earthquake design of the tanks, and anchoring the racks to the ground."
           }
         ],
         "unmatched_recommendations": [
@@ -220,22 +371,88 @@
           7,
           9
         ],
-        "judge_cost_usd": 0.020968
+        "judge_cost_usd": 0.020268
+      },
+      "support": {
+        "supported": 2,
+        "partial": 6,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.028856,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "partial",
+            "reason": "The quotes cite an active earthquake zone and possible flooding from the River Torre. This shows real exposure but does not separate Moderate from High; the active seismic zone could equally justify High."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls and a non-combustible steel deck directly support a non-combustible construction class."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The deck insulation is stated to be non-combustible. However, the recommendation to use non-combustible material and insulation hints that some combustible insulation may exist elsewhere."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Aerosol storage that can rocket and start multiple fires beyond sprinkler control supports an Extra high hazard classification."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "Both the northern and southern sections are said to have sprinkler systems, which is consistent with Full. The quotes do not confirm that every area of the site is covered, so Partial is not ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "partial",
+            "reason": "The northern high-rack and aerosol area is clearly inadequately protected. The southern section's NFPA-designed system could make Partially adequate the better fit."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone and possible flooding are consistent with High, but the flood exposure is only 'possible' and the quotes do not rule out Moderate. Q1 also rates the same evidence as Moderate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "An uncontrollable fire scenario with no available ceiling-only sprinkler solution supports a severe rating. It does not clearly distinguish Critical from High."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-sonnet-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 89,
         "cost_usd": 0.194736,
         "answered": 20,
         "recommendations": 9,
-        "recall": 1.0
+        "recall": 1.0,
+        "support": {
+          "supported": 2,
+          "partial": 6,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.028856
+        }
       }
     },
     {
       "case": "default-insurer",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "report_id": "6add9416-dcf0-4fa0-89f2-0e986b8359fc",
       "status": "completed",
       "error": "",
@@ -254,20 +471,62 @@
       "quotes_verified": 23,
       "recommendations": 4,
       "failed_calls": 1,
+      "support": {
+        "supported": 1,
+        "partial": 3,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.021576,
+        "items": [
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Partial",
+            "verdict": "partial",
+            "reason": "The quote shows sprinklers exist in Warehouse A, which rules out 'None'. Corrosion describes condition, not coverage, so it doesn't distinguish Partial from Full. The in-rack photo can't be assessed."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft with cardboard and shrink wrap points to an elevated hazard, consistent with High. Nothing rules out Extra high for high-piled storage involving plastics. The debris note is about housekeeping, not occupancy class."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinkler branch lines and no leak detection despite past water damage claims are real deficiencies consistent with High. Two issues don't clearly separate High from Medium or Critical."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "A sprinkler system that is present but corroded fits 'partially adequate': protection exists but is compromised. Poor housekeeping adds to the concern. The IBC photo can't be assessed, but the text alone justifies the middle option."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-haiku-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 41,
         "cost_usd": 0.011319,
         "answered": 9,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 3,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.021576
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "report_id": "af5ac915-05a4-4525-af71-7975402af61a",
       "status": "completed",
       "error": "",
@@ -287,7 +546,7 @@
       "recommendations": 9,
       "failed_calls": 0,
       "judge": {
-        "recall": 1.0,
+        "recall": 0.9,
         "verdicts": [
           {
             "expert_item": 1,
@@ -295,7 +554,7 @@
             "matched_recommendations": [
               3
             ],
-            "reason": "Survey item 3 covers the high rack storage under the 14.7 m ceiling with flammable liquids and aerosols. It asks for the same action: revise the sprinkler concept to suit the stored goods."
+            "reason": "Survey recommendation 3 covers the high racks under the 14.7 m roof holding flammable liquids and aerosols. It asks for the sprinkler concept to be revised to suit the stored goods."
           },
           {
             "expert_item": 2,
@@ -303,15 +562,15 @@
             "matched_recommendations": [
               2
             ],
-            "reason": "Survey item 2 limits the solid piled buffer storage to 1.5 m and asks to adapt the storage and sprinkler concept, matching the expert action."
+            "reason": "Survey recommendation 2 limits solid piles in the inbound/outbound buffer under the 9.1 m ceiling to 1.5 m. It also asks for the storage and sprinkler concept to be adapted."
           },
           {
             "expert_item": 3,
-            "verdict": "covered",
+            "verdict": "partial",
             "matched_recommendations": [
               7
             ],
-            "reason": "Survey item 7 limits container sizes per FM 7-29 Tab. 2.4.7.1 and applies Scheme A with a horizontal solid barrier. The specific sizes are not stated, but the cited table defines them."
+            "reason": "Survey recommendation 7 asks to limit container sizes per FM 7-29 and to apply Scheme A with a horizontal solid barrier. It does not state the specific limits of 60 ml, or 4 l for water-miscible liquids."
           },
           {
             "expert_item": 4,
@@ -319,7 +578,7 @@
             "matched_recommendations": [
               1
             ],
-            "reason": "Survey item 1 includes all three elements: dedicated rooms with adequate sprinklers for Level 2-3, a solid vertical barrier in the flue space, and a solid barrier above every second rack level."
+            "reason": "Survey recommendation 1 calls for dedicated rooms for Level 2-3 aerosols, a solid vertical barrier in the flue space and a solid barrier above every second rack level."
           },
           {
             "expert_item": 5,
@@ -327,7 +586,7 @@
             "matched_recommendations": [
               6
             ],
-            "reason": "Survey item 6 asks for bracing of the sprinkler piping, earthquake-designed tanks and racks anchored to the ground, matching all three expert actions."
+            "reason": "Survey recommendation 6 asks to brace the sprinkler piping, design the tanks for earthquakes and anchor the racks to the ground."
           }
         ],
         "unmatched_recommendations": [
@@ -336,22 +595,88 @@
           8,
           9
         ],
-        "judge_cost_usd": 0.021056
+        "judge_cost_usd": 0.021236
+      },
+      "support": {
+        "supported": 4,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.028524,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "The quote covers natural hazards (earthquake zone, possible flooding), not neighbouring or external exposures. The flooding is only 'possibly', so Moderate is not ruled out."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "The non-combustible steel deck roof on reinforced concrete columns supports a non-combustible construction class."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "unsupported",
+            "reason": "A recommendation to use non-combustible insulation does not show combustible insulation is absent. If anything it suggests combustible material may be present."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Flammable liquids, aerosols and high rack storage that sprinklers cannot control justify Extra high occupancy hazard."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quote refers to an NFPA sprinkler design, possibly as a recommendation, and does not establish full site coverage. The photo cannot be seen, so Partial is not ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "Several quotes state the sprinkler scheme is inadequate for the occupancy, the rack storage is inadequately protected and the pumps are under-designed."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "supported",
+            "reason": "An active earthquake zone plus possible river flooding supports High natural hazard exposure."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "The quotes show serious fire and earthquake protection deficiencies, consistent with a severe rating. They do not distinguish Critical from High."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-haiku-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 120,
         "cost_usd": 0.017702,
         "answered": 20,
         "recommendations": 9,
-        "recall": 1.0
+        "recall": 0.9,
+        "support": {
+          "supported": 4,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.028524
+        }
       }
     },
     {
       "case": "default-insurer",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "report_id": "655c63d8-d4c8-4097-b118-0eba621b4d6f",
       "status": "completed",
       "error": "",
@@ -370,20 +695,62 @@
       "quotes_verified": 38,
       "recommendations": 4,
       "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.01948,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Only photos are cited, so the construction class cannot be checked from text."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and shrink wrap/cardboard support a High hazard over Low or Ordinary. Extra high is not ruled out, since the flammable liquid IBC evidence is photo-only."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "A sprinkler system is present but corroded on branch lines in one section, which fits 'present but deficient'. That points to partially adequate rather than adequate or inadequate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers, poor housekeeping and no leak detection despite past water claims fit an elevated rating. They do not clearly separate High from Medium or Critical."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-opus-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 107,
         "cost_usd": 0.237825,
         "answered": 12,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.01948
+        }
       }
     },
     {
       "case": "default-insurer",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "report_id": "ff92fc80-74d0-410d-b892-3520d2e85cd7",
       "status": "completed",
       "error": "",
@@ -402,20 +769,56 @@
       "quotes_verified": 28,
       "recommendations": 4,
       "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.015916,
+        "items": [
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "The only text quote, racked storage to 40ft, shows high-piled storage and points above Low or Ordinary. It names no commodity, so it does not separate High from Extra high. The flammable-liquid photo that might settle this cannot be checked."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "A sprinkler system is present, which argues against Inadequate. Corroded branch lines in the south section and an overdue generator test argue against Adequate. Together these justify the middle option."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers, no leak detection despite past water damage claims, and poor housekeeping are real deficiencies. They are consistent with High but could equally support Medium, and nothing in the quotes clearly rules Medium out."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-sonnet-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 56,
         "cost_usd": 0.083913,
         "answered": 10,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.015916
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "report_id": "79359d21-cae8-4227-a323-27d0f4f917be",
       "status": "completed",
       "error": "",
@@ -441,9 +844,10 @@
             "expert_item": 1,
             "verdict": "covered",
             "matched_recommendations": [
-              2
+              2,
+              1
             ],
-            "reason": "Rec 2 matches the expert item: for high racks under the 14.7 m ceiling it says no ceiling-only solution works and asks to adapt the sprinkler concept to the stored goods."
+            "reason": "Survey rec 2 matches it: ceiling at 14.7 m, no ceiling-only design for flammable liquids and aerosols, and the sprinkler concept is to be redefined for the stored goods."
           },
           {
             "expert_item": 2,
@@ -451,7 +855,7 @@
             "matched_recommendations": [
               5
             ],
-            "reason": "Rec 5 limits solid piles in the buffer areas to 1.5 m per FM 7-29, or alternatively adapts the storage and sprinkler concept, as the expert asks."
+            "reason": "Survey rec 5 limits solid piles in the buffer areas under the 9.1 m ceiling to 1.5 m per FM 7-29, or redefines the storage and sprinkler concept."
           },
           {
             "expert_item": 3,
@@ -459,7 +863,7 @@
             "matched_recommendations": [
               6
             ],
-            "reason": "Rec 6 sets the same container limits (60 ml, or 4 l for water-miscible liquids) and calls for Scheme A with a horizontal solid barrier."
+            "reason": "Survey rec 6 sets the 60 ml and 4 l (water-miscible) container limits and applies Scheme A with a horizontal solid barrier."
           },
           {
             "expert_item": 4,
@@ -467,7 +871,7 @@
             "matched_recommendations": [
               4
             ],
-            "reason": "Rec 4 asks for the same aerosol segregation: a vertical flue-space barrier, a barrier above every second rack level, and dedicated rooms for Level 2-3."
+            "reason": "Survey rec 4 segregates aerosols above Level 1 with a vertical flue barrier and a barrier over every second rack level, and assigns dedicated areas with adequate sprinklers to Level 2-3."
           },
           {
             "expert_item": 5,
@@ -475,31 +879,96 @@
             "matched_recommendations": [
               8
             ],
-            "reason": "Rec 8 covers all three seismic actions: bracing the sprinkler piping, seismic design of the tanks and anchoring the racks to the floor."
+            "reason": "Survey rec 8 braces the sprinkler piping, checks the tanks' seismic resistance and anchors the racks to the floor."
           }
         ],
         "unmatched_recommendations": [
-          1,
           3,
           7,
           9
         ],
-        "judge_cost_usd": 0.024608
+        "judge_cost_usd": 0.024788
+      },
+      "support": {
+        "supported": 4,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.030784,
+        "items": [
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "The quotes say a fire cannot be controlled and the high rack storage is inadequately protected. That points to a severe rating but does not clearly separate Critical from High."
+          },
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "High",
+            "verdict": "unsupported",
+            "reason": "The quotes cover earthquake and flood, which are natural hazards. They say nothing about exposure from neighbouring properties or external occupancies."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "The walls are precast concrete, the columns reinforced concrete and the deck a non-combustible insulated steel deck, which directly supports Non-combustible."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck is described as non-combustible insulated. However, the advice to use non-combustible material and insulation hints that combustible material may exist somewhere, so Yes is not ruled out."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Aerosol cans that rocket and start multiple fires, with no ceiling-only sprinkler solution available, indicate an extra-high hazard occupancy."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "Both the northern and southern storage sections are sprinklered. Nothing confirms that every area of the site is covered, so Partial is not ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "The quotes state the high rack storage is inadequately protected, the buffer storage likely is too, and the pumps are likely under-designed. Together these support Inadequate."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "supported",
+            "reason": "The site is in an active earthquake zone and possibly exposed to river flooding, which supports a High natural hazard exposure."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-opus-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 164,
         "cost_usd": 0.405382,
         "answered": 20,
         "recommendations": 9,
-        "recall": 1.0
+        "recall": 1.0,
+        "support": {
+          "supported": 4,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.030784
+        }
       }
     },
     {
       "case": "default-insurer",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "report_id": "1b52f7bf-a7b5-435e-bf6d-f1e105cc7459",
       "status": "completed",
       "error": "",
@@ -518,20 +987,62 @@
       "quotes_verified": 23,
       "recommendations": 4,
       "failed_calls": 0,
+      "support": {
+        "supported": 0,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.020856,
+        "items": [
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racking to 40ft with cardboard and shrink-wrap debris points to a High hazard over Ordinary. But tall racks holding plastics could also justify Extra high, and the flammable-liquid IBC photo, which might settle it, cannot be checked."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Partial",
+            "verdict": "unsupported",
+            "reason": "The quote confirms a sprinkler system exists and notes corrosion in the south section. It says nothing about coverage extent, so it does not show Partial coverage. The in-rack sprinkler photo cannot be seen and would, if anything, suggest wider coverage."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "partial",
+            "reason": "A sprinkler system with corroded branch lines in one section fits Partially adequate. However, the evidence does not establish the system's capability or rule out Inadequate. The housekeeping quote relates to hazard rather than to protection."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers and missing leak detection despite past water claims support an elevated rating. They do not clearly separate High from Medium or Critical, and the main hazard drivers are not cited."
+          }
+        ]
+      },
       "summary": {
         "case": "default-insurer",
         "model": "claude-haiku-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 74,
         "cost_usd": 0.00802,
         "answered": 11,
         "recommendations": 4,
-        "recall": null
+        "recall": null,
+        "support": {
+          "supported": 0,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.020856
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "report_id": "623b3387-c3ac-4a8f-a8e4-3bc4489aa24a",
       "status": "completed",
       "error": "",
@@ -559,7 +1070,7 @@
             "matched_recommendations": [
               1
             ],
-            "reason": "Same hazard (flammable liquids/aerosols in high racks under 14.7 m) and same action: adapt the sprinkler concept to the stored goods."
+            "reason": "Survey item 1 covers the same hazard: the high rack area under the 14.7 m ceiling. It asks for the same action, adapting the sprinkler concept to the stored goods."
           },
           {
             "expert_item": 2,
@@ -567,7 +1078,7 @@
             "matched_recommendations": [
               5
             ],
-            "reason": "Asks to limit solid-pile stacks in the buffer areas to 1.5 m per FM 7-29, or to adapt the storage and sprinkler concept."
+            "reason": "Survey item 5 limits solid piles in the buffer areas to 1.5 m per FM 7-29, or calls for an adapted storage and sprinkler concept."
           },
           {
             "expert_item": 3,
@@ -575,7 +1086,7 @@
             "matched_recommendations": [
               6
             ],
-            "reason": "Same container limits (60 ml; 4 l if miscible) and Scheme A with a horizontal solid barrier for the flow-through racks."
+            "reason": "Survey item 6 gives the same container limits (60 ml, 4 l if miscible) and requires Scheme A with a horizontal solid barrier."
           },
           {
             "expert_item": 4,
@@ -583,7 +1094,7 @@
             "matched_recommendations": [
               2
             ],
-            "reason": "Same segregation of aerosols above Level 1 with vertical flue barriers, horizontal barriers every second level, and dedicated rooms for Level 2-3."
+            "reason": "Survey item 2 specifies the same vertical flue barriers, barriers above every second rack level, and dedicated areas for Level 2-3 aerosols."
           },
           {
             "expert_item": 5,
@@ -591,7 +1102,7 @@
             "matched_recommendations": [
               8
             ],
-            "reason": "Covers bracing of sprinkler piping, seismic design of the tanks, and anchoring the racks to the ground."
+            "reason": "Survey item 8 asks to brace the sprinkler piping, design the tanks for earthquakes, and anchor the racks to the ground."
           }
         ],
         "unmatched_recommendations": [
@@ -599,22 +1110,82 @@
           4,
           7
         ],
-        "judge_cost_usd": 0.019848
+        "judge_cost_usd": 0.020188
+      },
+      "support": {
+        "supported": 2,
+        "partial": 5,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.028028,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "partial",
+            "reason": "The quote covers natural perils (earthquake, possible flooding), not exposure from neighbouring properties. It fits a moderate rating but doesn't rule out Low or High."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls and a non-combustible steel deck on reinforced concrete point clearly to non-combustible construction."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Aerosol storage that sprinklers cannot control, with no ceiling-only protection solution available, indicates an extra high hazard occupancy."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "Both the northern and southern storage sections are sprinklered, but the quotes don't confirm coverage of the whole site, such as offices or ancillary areas."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "partial",
+            "reason": "The quotes show protection is inadequate in one area, but the southern section follows NFPA 13 and 20, so 'Partially adequate' is not ruled out."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone supports an elevated rating, but the flood exposure is only 'possible', so Moderate is not excluded."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Uncontrollable fire in part of the warehouse plus seismic exposure supports a high rating, but the quotes don't distinguish Critical from High."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-sonnet-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 84,
         "cost_usd": 0.191904,
         "answered": 19,
         "recommendations": 8,
-        "recall": 1.0
+        "recall": 1.0,
+        "support": {
+          "supported": 2,
+          "partial": 5,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.028028
+        }
       }
     },
     {
       "case": "customer-a",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "report_id": "9398ceb6-aedb-4377-88f1-f1a07cf1d2dd",
       "status": "completed",
       "error": "",
@@ -642,7 +1213,7 @@
             "matched_recommendations": [
               2
             ],
-            "reason": "Both call for adapting the sprinkler design for the flammable liquids and aerosols stored in the high racks under the 14.7 m ceiling."
+            "reason": "The survey asks to adapt the sprinkler design for the high rack storage of flammable liquids and aerosols under the 14.7 m ceiling, which is the expert's action."
           },
           {
             "expert_item": 2,
@@ -650,7 +1221,7 @@
             "matched_recommendations": [
               5
             ],
-            "reason": "Both limit the solid-piled buffer storage to 1.5 m per FM 7-29, or else adapt the storage and protection concept."
+            "reason": "The survey limits solid piled buffer storage under the 9.1 m ceiling to 1.5 m per FM 7-29, or alternatively calls for an adapted storage and protection concept."
           },
           {
             "expert_item": 3,
@@ -658,7 +1229,7 @@
             "matched_recommendations": [
               7
             ],
-            "reason": "Both set the same container size limits (60 ml; 4 l if water-miscible) and require the horizontal barrier Scheme A per FM 7-29."
+            "reason": "The survey sets the same container size limits for flow-through racks (60 ml, or 4 l if water-miscible) and requires the horizontal barrier Scheme A from FM 7-29."
           },
           {
             "expert_item": 4,
@@ -666,7 +1237,7 @@
             "matched_recommendations": [
               4
             ],
-            "reason": "Both require the vertical flue barrier, a barrier above every second rack level, and dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+            "reason": "The survey requires a vertical barrier in the flue space, a barrier above every second rack level, and dedicated sprinklered rooms for Level 2-3 aerosols."
           },
           {
             "expert_item": 5,
@@ -674,7 +1245,7 @@
             "matched_recommendations": [
               6
             ],
-            "reason": "Both call for bracing the sprinkler piping, seismic design of the tanks and anchoring the racks to the floor."
+            "reason": "The survey asks to brace the sprinkler piping, design the sprinkler tanks for earthquakes and anchor the racks to the floor, matching all three expert actions."
           }
         ],
         "unmatched_recommendations": [
@@ -682,17 +1253,1431 @@
           3,
           8
         ],
-        "judge_cost_usd": 0.020504
+        "judge_cost_usd": 0.021584
+      },
+      "support": {
+        "supported": 0,
+        "partial": 6,
+        "unsupported": 2,
+        "photo_only": 0,
+        "judge_cost_usd": 0.030396,
+        "items": [
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "partial",
+            "reason": "The quotes describe one area, the buffer storage under the canopy, as inadequately protected. That fits 'Inadequate' but does not rule out 'Partially adequate' for the site as a whole."
+          },
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "unsupported",
+            "reason": "The quote covers natural hazards (earthquake, flooding), not external exposure from neighbouring properties or activities."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "partial",
+            "reason": "The quote confirms a non-combustible roof deck and concrete columns. Walls and other elements are not described, so 'Mixed' cannot be ruled out."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck is described as non-combustible. However, the recommendation to use non-combustible insulation hints that combustible materials may be present elsewhere."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "unsupported",
+            "reason": "The quote is about whether the sprinkler system can control a fire, not about how hazardous the occupancy itself is."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Partial",
+            "verdict": "partial",
+            "reason": "The quote shows a system is installed but cannot control a fire in one area. This could reflect inadequate design rather than partial coverage, so 'Full' is not excluded. The photo cannot be checked."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone points to significant exposure but does not by itself rule out 'Moderate'."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Inadequate rack protection and seismic exposure suggest elevated risk but do not distinguish 'Critical' from 'High'."
+          }
+        ]
       },
       "summary": {
         "case": "customer-a",
         "model": "claude-haiku-5-5",
+        "effort": "medium",
         "status": "completed",
         "seconds": 116,
         "cost_usd": 0.015214,
         "answered": 20,
         "recommendations": 8,
-        "recall": 1.0
+        "recall": 1.0,
+        "support": {
+          "supported": 0,
+          "partial": 6,
+          "unsupported": 2,
+          "photo_only": 0,
+          "judge_cost_usd": 0.030396
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "report_id": "db5bda86-42a1-4b40-8242-eb4912c5023b",
+      "status": "completed",
+      "error": "",
+      "seconds": 226,
+      "cost_usd": 0.545651,
+      "tokens": {
+        "input": 6926,
+        "output": 22972,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 13,
+      "insufficient_evidence": 9,
+      "quotes": 47,
+      "quotes_verified": 47,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.021996,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "unsupported",
+            "reason": "The only quoted text gives floor area and racking height, which say nothing about the materials of the building. The photos cannot be checked, so nothing visible supports non-combustible over the other classes."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "40ft racked storage, poor housekeeping with combustible packaging debris and electronics storage are consistent with a high hazard. They do not rule out ordinary or extra high, as no commodity class or flammable-liquid quantities are quoted."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "'Sprinkler system present' shows sprinklers exist but not that they cover the whole site, so it does not distinguish full from partial protection. The in-rack photo cannot be seen."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "A sprinkler system exists, but corrosion on branch lines in the south section is a localised deficiency. That fits partially adequate better than adequate or inadequate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Sprinkler corrosion, poor housekeeping and no leak detection despite past water claims point to elevated risk. They do not clearly separate high from medium or critical."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-opus-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 226,
+        "cost_usd": 0.545651,
+        "answered": 13,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.021996
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "report_id": "706c84bb-12d0-4003-ba28-7b54d7248b24",
+      "status": "completed",
+      "error": "",
+      "seconds": 131,
+      "cost_usd": 0.213148,
+      "tokens": {
+        "input": 5247,
+        "output": 16774,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 11,
+      "insufficient_evidence": 11,
+      "quotes": 31,
+      "quotes_verified": 31,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.018736,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Cites only photos, which cannot be checked. No text describes the building materials."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and accumulated combustible debris point to an elevated hazard and fit 'High'. The flammable liquids evidence is photo-only, though, and 40ft racking could equally justify 'Extra high'."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "Sprinklers are present but corroded in one section, and protection is challenged by 40ft racking. That shows protection that exists but is deficient, which fits 'Partially adequate' over the other options."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers, high racking and no leak detection despite past water claims all show significant deficiencies, consistent with 'High'. They do not clearly rule out 'Medium' or 'Critical'."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-sonnet-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 131,
+        "cost_usd": 0.213148,
+        "answered": 11,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.018736
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "report_id": "eab14f33-bcee-4532-bfcd-64d429c3b187",
+      "status": "completed",
+      "error": "",
+      "seconds": 481,
+      "cost_usd": 1.304868,
+      "tokens": {
+        "input": 18045,
+        "output": 55717,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 21,
+      "insufficient_evidence": 1,
+      "quotes": 153,
+      "quotes_verified": 153,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              3,
+              1
+            ],
+            "reason": "Survey rec 3 asks to adapt the sprinkler concept to the goods in the high racks under the 14.7 m ceiling and notes that no ceiling-only solution exists."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Survey rec 5 asks to limit solid-pile stacks to 1.5 m under FM 7-29 or adapt the storage and sprinkler concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Survey rec 6 sets the same container limits (60 ml; 4 l if water-miscible) and calls for Scheme A with a horizontal solid barrier."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Survey rec 4 asks for the same flue-space vertical barrier, a barrier above every second rack level, and dedicated rooms for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Survey rec 8 asks to brace the sprinkler piping, design the tanks for earthquakes, and anchor the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          2,
+          7,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.028472
+      },
+      "support": {
+        "supported": 4,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.038228,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "High",
+            "verdict": "unsupported",
+            "reason": "The quotes cover only earthquake and flood, which are natural hazards (asked separately in Q7). Nothing addresses exposure from neighbouring properties or the surroundings."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls, a non-combustible insulated steel deck and reinforced concrete columns clearly establish non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck insulation is stated as non-combustible. However, the recommendation to use non-combustible materials and insulation hints that some combustible elements may exist, and wall panels are not fully addressed."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Storage of Class IB flammable liquids and aerosols, with no ceiling-only sprinkler solution available and a rocketing aerosol hazard, justifies Extra high over High."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quotes confirm a sprinkler system exists but say nothing about whether it covers the whole site. They do not rule out Partial coverage."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "Multiple statements call the sprinklers, rack protection and buffer storage protection inadequate, and say the pumps are likely under-designed."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone supports an elevated rating, but the seismic zone severity is not quantified and flooding is only 'possibly' a risk. Moderate cannot be ruled out."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "supported",
+            "reason": "A fire that cannot be controlled by the installed system, inadequate protection, under-designed pumps and an aerosol fire-spread hazard together support Critical."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-opus-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 481,
+        "cost_usd": 1.304868,
+        "answered": 21,
+        "recommendations": 10,
+        "recall": 1.0,
+        "support": {
+          "supported": 4,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.038228
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "report_id": "50e769a9-81e8-4fda-897f-d7671d88334a",
+      "status": "completed",
+      "error": "",
+      "seconds": 218,
+      "cost_usd": 0.026735,
+      "tokens": {
+        "input": 4594,
+        "output": 49060,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 10,
+      "insufficient_evidence": 12,
+      "quotes": 32,
+      "quotes_verified": 32,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 0,
+        "partial": 3,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.020668,
+        "items": [
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and combustible packaging debris support a hazard above Ordinary. The commodity type is not stated, so Extra high cannot be ruled out."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Partial",
+            "verdict": "unsupported",
+            "reason": "The quote shows a sprinkler system exists and describes its condition (corrosion in the south section). It says nothing about how much of the site is covered, so it does not indicate Partial rather than Full."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinkler branch lines and missing leak detection despite past water claims point to elevated risk. They do not clearly separate High from Medium or Critical."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "partial",
+            "reason": "Sprinklers are present but corroded, and housekeeping is poor. This fits Partially adequate, but the deficiencies could equally justify Inadequate."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-haiku-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 218,
+        "cost_usd": 0.026735,
+        "answered": 10,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 0,
+          "partial": 3,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.020668
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "report_id": "9c699491-46ae-415b-9954-cf5d1ffb3316",
+      "status": "completed",
+      "error": "",
+      "seconds": 280,
+      "cost_usd": 0.507988,
+      "tokens": {
+        "input": 12700,
+        "output": 41196,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 95,
+      "quotes_verified": 95,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Survey item 2 asks for a new sprinkler concept based on the goods actually stored in the high racks under the 14.7 m ceiling. It notes that no ceiling-only solution exists for flammable liquids and aerosols, which is the same action as the expert's."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Survey item 4 limits ignitable-liquid stacks in the inbound/outbound buffer areas to 1.5 m per FM 7-29. As an alternative it allows a storage and sprinkler concept adapted to the goods, matching the expert's options."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Survey item 7 sets the same container limits for flow-through racks (60 ml, or 4 l if water-miscible). It also requires Scheme A with a horizontal solid barrier per FM 7-29."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Survey item 1 segregates aerosols above NFPA 30B Level 1 with a vertical barrier in the flue space and a solid barrier above every second rack level. It also calls for dedicated, adequately sprinklered rooms for Level 2-3."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Survey item 8 covers all three measures: bracing the sprinkler piping, earthquake-resistant tank design and anchoring the racks to the ground."
+          }
+        ],
+        "unmatched_recommendations": [
+          3,
+          5,
+          6,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.027892
+      },
+      "support": {
+        "supported": 3,
+        "partial": 4,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.02888,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "unsupported",
+            "reason": "The quotes cover only natural hazards (earthquake, flood), which Q7 rates separately. Nothing describes neighbouring properties or other external exposures that would justify Moderate."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls, reinforced concrete columns, a non-combustible steel deck and a non-combustible suspended ceiling all point to non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck is explicitly non-combustible and insulated, which fits No. However, the recommendation to use non-combustible insulation hints that some combustible insulation or panels may exist elsewhere."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Flammable liquids and aerosols stored in high racks, mixed with other goods and inadequately protected, justify the top hazard class."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quotes confirm a sprinkler system exists (VdS/NFPA design) but say nothing about how much of the site it covers, so Partial is not ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "The report states a fire cannot be controlled, the high rack storage is inadequately protected and the pumps are likely under-designed. Together these clearly support Inadequate."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone plus possible flooding is consistent with High. But the flood exposure is only 'possible', so Moderate is not clearly ruled out."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Inadequate sprinklers, an underprotected high-hazard occupancy and seismic exposure indicate an elevated risk. The quotes do not distinguish Critical from High."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-sonnet-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 280,
+        "cost_usd": 0.507988,
+        "answered": 20,
+        "recommendations": 10,
+        "recall": 1.0,
+        "support": {
+          "supported": 3,
+          "partial": 4,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.02888
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "report_id": "72e537f0-261a-4ec4-aaa7-625b2e1e993d",
+      "status": "completed",
+      "error": "",
+      "seconds": 213,
+      "cost_usd": 0.502191,
+      "tokens": {
+        "input": 6811,
+        "output": 20822,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 12,
+      "insufficient_evidence": 10,
+      "quotes": 43,
+      "quotes_verified": 43,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 1,
+        "partial": 2,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.017792,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Only photos are cited, so the construction class cannot be checked."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "40ft racked storage in a 250,000 sq ft warehouse with combustible packaging debris supports at least High. But high-piled storage at 40ft could also justify Extra high. The flammable-liquid evidence is photo-only."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "supported",
+            "reason": "Sprinklers are present, which rules out Inadequate. Corroded branch lines and poor housekeeping rule out Adequate. Together they justify Partially adequate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers, 40ft racking and no leak detection despite prior water claims point to elevated risk. They do not clearly separate High from Medium or Critical."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-opus-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 213,
+        "cost_usd": 0.502191,
+        "answered": 12,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 1,
+          "partial": 2,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.017792
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "report_id": "166d9486-f26d-4afb-919a-f27e02cffcb2",
+      "status": "completed",
+      "error": "",
+      "seconds": 139,
+      "cost_usd": 0.221136,
+      "tokens": {
+        "input": 5146,
+        "output": 17593,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 11,
+      "insufficient_evidence": 11,
+      "quotes": 31,
+      "quotes_verified": 31,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 0,
+        "partial": 3,
+        "unsupported": 0,
+        "photo_only": 1,
+        "judge_cost_usd": 0.018276,
+        "items": [
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "photo_only",
+            "reason": "Only photos are cited, and no text describes the construction materials."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and accumulated cardboard and shrink-wrap debris point to a high hazard. However, high-piled storage with plastics could also justify Extra high, and the flammable liquids evidence is photo only."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "partial",
+            "reason": "A sprinkler system that is present but corroded fits Partially adequate. Nothing confirms that the system is suited to 40ft racking, so Inadequate is not ruled out; the in-rack sprinkler evidence is photo only."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Corroded sprinklers, no leak detection despite past water claims, and poor housekeeping are several deficiencies that fit High. The quotes do not clearly rule out Medium or Critical."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-sonnet-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 139,
+        "cost_usd": 0.221136,
+        "answered": 11,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 0,
+          "partial": 3,
+          "unsupported": 0,
+          "photo_only": 1,
+          "judge_cost_usd": 0.018276
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "report_id": "82505c76-aa2f-419a-8a50-1b57a70df5d2",
+      "status": "completed",
+      "error": "",
+      "seconds": 324,
+      "cost_usd": 0.04476,
+      "tokens": {
+        "input": 10575,
+        "output": 80341,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 69,
+      "quotes_verified": 69,
+      "recommendations": 9,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Survey item 1 addresses the same hazard: high rack storage of flammable liquids and aerosols under the 14.7 m ceiling. It asks for the same action, a sprinkler concept adapted to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Survey item 2 asks to limit the inbound/outbound buffer stacks to 1.5 m per FM 7-29, or to adapt the storage and sprinkler concept. This matches the expert item."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Survey item 4 sets the same container limits (60 ml; 4 l if water-miscible) for the flow-through racks. It also calls for Scheme A with a horizontal solid barrier per FM 7-29."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              3
+            ],
+            "reason": "Survey item 3 calls for a solid vertical barrier in the flue space and a solid barrier above every second rack level. It also asks for dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6,
+              7
+            ],
+            "reason": "Survey item 6 covers bracing the sprinkler piping and designing the tanks for earthquakes. Survey item 7 covers anchoring the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          5,
+          8,
+          9
+        ],
+        "judge_cost_usd": 0.024704
+      },
+      "support": {
+        "supported": 4,
+        "partial": 4,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.02914,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "partial",
+            "reason": "An active earthquake zone and possible river flooding 1.3 km away fit a Moderate rating. However, the quotes give no severity detail that rules out High, and the same evidence is rated High in Q7."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls, a non-combustible steel deck and reinforced concrete columns clearly indicate non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "supported",
+            "reason": "The insulated deck is explicitly described as non-combustible and the walls are precast concrete, so no combustible insulation is indicated."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Aerosol storage that can rocket, start multiple fires and exceed sprinkler control is characteristic of an extra high hazard occupancy."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quotes confirm a sprinkler system exists (VdS/NFPA design) but say nothing about the extent of coverage. They do not rule out Partial."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "An uncontrollable fire area, under-designed pumps and no available ceiling-only solution together support Inadequate."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone that could impair the sprinklers is consistent with High, but no seismic intensity is given to rule out Moderate. It is also inconsistent with the Moderate rating in Q1."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Uncontrollable fire potential and inadequately protected high-rack storage indicate serious risk. They do not clearly distinguish Critical from High."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-haiku-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 324,
+        "cost_usd": 0.04476,
+        "answered": 20,
+        "recommendations": 9,
+        "recall": 1.0,
+        "support": {
+          "supported": 4,
+          "partial": 4,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.02914
+        }
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "report_id": "f8277e15-779e-428e-9916-c2c05b5a005c",
+      "status": "completed",
+      "error": "",
+      "seconds": 210,
+      "cost_usd": 0.025757,
+      "tokens": {
+        "input": 5055,
+        "output": 47010,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 11,
+      "insufficient_evidence": 11,
+      "quotes": 35,
+      "quotes_verified": 35,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "support": {
+        "supported": 0,
+        "partial": 3,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.015264,
+        "items": [
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Racked storage to 40ft and poor housekeeping point to an elevated hazard. They do not separate High from Extra high, especially with flammable liquids possibly present (shown only in a photo). The electronics storage note does not bear on fire hazard class."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Partially adequate",
+            "verdict": "partial",
+            "reason": "A sprinkler system with corrosion on branch lines fits partial adequacy. Nothing shows whether the corrosion compromises performance, or whether the system suits 40ft racking, so Inadequate is not ruled out. Housekeeping is not fire protection, and the in-rack sprinkler photo can't be checked."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "Sprinkler corrosion and no leak detection despite previous water damage claims show real deficiencies. They are consistent with High but could equally support Medium, and the flammable liquids photo can't be checked."
+          }
+        ]
+      },
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-haiku-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 210,
+        "cost_usd": 0.025757,
+        "answered": 11,
+        "recommendations": 4,
+        "recall": null,
+        "support": {
+          "supported": 0,
+          "partial": 3,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.015264
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "report_id": "b5f10b2e-4e2d-4cfe-97ad-6b79ba8234a3",
+      "status": "completed",
+      "error": "",
+      "seconds": 486,
+      "cost_usd": 1.309964,
+      "tokens": {
+        "input": 16879,
+        "output": 56205,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 143,
+      "quotes_verified": 143,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2,
+              1
+            ],
+            "reason": "Survey states no ceiling-only design at 14.7 m for flammable liquids and aerosols and asks to adapt the sprinkler concept to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Survey asks to limit solid piles in the buffer areas to 1.5 m per FM 7-29, or else to adapt the storage and protection concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Survey gives the same container limits (60 ml; 4 l if water-miscible) and calls for Scheme A with a horizontal solid barrier."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              3
+            ],
+            "reason": "Survey requires a vertical barrier in the flue space, a horizontal barrier every second rack level, and dedicated sprinklered rooms for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Survey asks to brace the sprinkler piping, design the tanks for earthquakes and anchor the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          5,
+          6,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.028248
+      },
+      "support": {
+        "supported": 3,
+        "partial": 4,
+        "unsupported": 1,
+        "photo_only": 0,
+        "judge_cost_usd": 0.032912,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "High",
+            "verdict": "unsupported",
+            "reason": "The quotes cover natural perils (earthquake, possible river flooding), not exposure from neighbouring properties or activities. That is what external exposure normally means, so nothing here supports a rating."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "The text states precast concrete walls, a non-combustible insulated steel deck and reinforced concrete columns, which is non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The roof deck is described as non-combustible insulated. However, the recommendation to use non-combustible building material and insulation hints that combustible insulation may exist somewhere, so 'Yes' is not ruled out."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "The site stores and picks Class IB flammable liquids and aerosols, solid piled over 1.5 m, with no ceiling-only sprinkler solution available. That justifies extra high over high."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quotes confirm a sprinkler system (VdS/NFPA design, in-rack sprinklers) but say nothing about coverage extent. Partial coverage is not ruled out."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "Multiple statements say protection is inadequate: fire cannot be controlled, racks and solid-piled areas are inadequately protected, and pumps are likely under-designed."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone and possible flooding support an elevated rating. However, there is no hazard zone grading and the flooding is only 'possible', so moderate is not excluded."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "The quotes show serious protection deficiencies and seismic exposure, consistent with a high rating. Nothing distinguishes critical from high."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-opus-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 486,
+        "cost_usd": 1.309964,
+        "answered": 20,
+        "recommendations": 10,
+        "recall": 1.0,
+        "support": {
+          "supported": 3,
+          "partial": 4,
+          "unsupported": 1,
+          "photo_only": 0,
+          "judge_cost_usd": 0.032912
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "report_id": "9a1880e0-28e1-4caf-b574-ae4081b0e6a0",
+      "status": "completed",
+      "error": "",
+      "seconds": 268,
+      "cost_usd": 0.485018,
+      "tokens": {
+        "input": 12895,
+        "output": 38860,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 105,
+      "quotes_verified": 105,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Survey item 1 covers the high racks under the 14.7 m ceiling. It notes there is no ceiling-only solution for flammable liquids and aerosols and asks to redefine the sprinkler concept for the goods actually stored."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Survey item 6 covers the solid piled buffer areas under the 9.1 m ceiling. It asks to limit stacks to 1.5 m per FM 7-29 or adapt the storage and sprinkler concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Survey item 7 asks for the same container-size limits (60 ml; 4 l if water-miscible) and Scheme A with a horizontal solid barrier."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Survey item 2 asks for the same vertical flue barrier, a barrier above every second rack level, and dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Survey item 8 asks to brace the sprinkler piping, design the tanks for earthquakes, and anchor the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          3,
+          4,
+          5,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.026004
+      },
+      "support": {
+        "supported": 4,
+        "partial": 4,
+        "unsupported": 0,
+        "photo_only": 0,
+        "judge_cost_usd": 0.030872,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "partial",
+            "reason": "The quotes cover only natural hazards (an active earthquake zone and possible flooding). They say nothing about neighbouring or external exposures, and an active seismic zone could equally justify High."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls and a non-combustible steel deck directly support Non-combustible."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The deck insulation is described as non-combustible, which fits No. However, the recommendation to use non-combustible materials and insulation hints that some combustible material may be present."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "High-bay storage of flammable liquids and aerosols, with no ceiling-only sprinkler solution available, justifies Extra high over High."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "partial",
+            "reason": "The quotes confirm a sprinkler system exists but say nothing about its extent, so Partial coverage is not ruled out."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Inadequate protection, under-designed pumps and seismic exposure support a severe rating, but nothing here clearly separates Critical from High."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "Multiple quotes state the sprinklers and pumps are inadequate or under-designed and that an uncontrolled fire is likely, which supports Inadequate."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "supported",
+            "reason": "An active earthquake zone, possible flood exposure and sprinkler failure after an earthquake support High."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-sonnet-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 268,
+        "cost_usd": 0.485018,
+        "answered": 20,
+        "recommendations": 10,
+        "recall": 1.0,
+        "support": {
+          "supported": 4,
+          "partial": 4,
+          "unsupported": 0,
+          "photo_only": 0,
+          "judge_cost_usd": 0.030872
+        }
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "report_id": "2f7d8b34-70f6-4992-a7fd-b6d40e6cee8c",
+      "status": "completed",
+      "error": "",
+      "seconds": 419,
+      "cost_usd": 0.0579,
+      "tokens": {
+        "input": 11988,
+        "output": 106341,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 95,
+      "quotes_verified": 95,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Same hazard (high rack flammable liquids/aerosols at 14.7 m), same action to adapt sprinkler concept to stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              3
+            ],
+            "reason": "Limit solid piled buffer storage to 1.5 m per FM 7-29 or adapt storage/sprinkler concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Container size limits 60 ml / 4 l water-miscible and Scheme A horizontal barrier."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Vertical flue barrier, barrier every second level, dedicated rooms for Level 2-3."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Brace piping, seismic tank design, anchor racks."
+          }
+        ],
+        "unmatched_recommendations": [
+          4,
+          6,
+          8,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.022412
+      },
+      "support": {
+        "supported": 3,
+        "partial": 3,
+        "unsupported": 2,
+        "photo_only": 0,
+        "judge_cost_usd": 0.031192,
+        "items": [
+          {
+            "question": "site-and-exposure.exposure_level",
+            "chosen": "Moderate",
+            "verdict": "unsupported",
+            "reason": "The quotes cover earthquake and flood, which are natural hazards, not external exposure from neighbouring properties. The same evidence was also used to rate natural hazards High, so it does not establish Moderate here."
+          },
+          {
+            "question": "construction.construction_class",
+            "chosen": "Non-combustible",
+            "verdict": "supported",
+            "reason": "Precast concrete walls, reinforced concrete columns and a non-combustible insulated steel deck clearly indicate non-combustible construction."
+          },
+          {
+            "question": "construction.combustible_insulation",
+            "chosen": "No",
+            "verdict": "partial",
+            "reason": "The deck is described as non-combustible insulated. However, the recommendation to use non-combustible materials and insulation hints that some combustible insulation may be present, which leaves Yes possible."
+          },
+          {
+            "question": "natural-hazards.natural_hazard_rating",
+            "chosen": "High",
+            "verdict": "partial",
+            "reason": "An active earthquake zone and possible river flooding support an elevated rating. The flooding is only 'possible', though, so Moderate is not ruled out against High."
+          },
+          {
+            "question": "occupancy.occupancy_hazard",
+            "chosen": "Extra high",
+            "verdict": "supported",
+            "reason": "Storage of flammable liquids and aerosols in high racks under a 14.7 m roof, with inadequate protection, justifies Extra high."
+          },
+          {
+            "question": "fire-protection.sprinkler_coverage",
+            "chosen": "Full",
+            "verdict": "unsupported",
+            "reason": "'Storage in the northern section is protected by' implies only part of the site is covered. The NFPA reference does not show full coverage, and other quotes note inadequately protected areas. The photo cannot be assessed."
+          },
+          {
+            "question": "fire-protection.protection_rating",
+            "chosen": "Inadequate",
+            "verdict": "supported",
+            "reason": "The quotes say fire cannot be controlled by the installed system, buffer storage is inadequately protected, the pumps are under-designed and no ceiling-only solution exists. This clearly supports Inadequate."
+          },
+          {
+            "question": "executive-summary.overall_risk_rating",
+            "chosen": "Critical",
+            "verdict": "partial",
+            "reason": "Inadequate rack protection, under-designed pumps and earthquake exposure support a severe rating. They do not clearly distinguish Critical from High, and the photo cannot be assessed."
+          }
+        ]
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-haiku-5-5",
+        "effort": "xhigh",
+        "status": "completed",
+        "seconds": 419,
+        "cost_usd": 0.0579,
+        "answered": 20,
+        "recommendations": 10,
+        "recall": 1.0,
+        "support": {
+          "supported": 3,
+          "partial": 3,
+          "unsupported": 2,
+          "photo_only": 0,
+          "judge_cost_usd": 0.031192
+        }
       }
     }
   ],
@@ -700,6 +2685,7 @@
     {
       "case": "default-insurer",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 106.5,
@@ -709,11 +2695,31 @@
       "quotes_verified": "74/74",
       "recommendations": 4,
       "recall": null,
-      "failed_calls": 0
+      "failed_calls": 0,
+      "rated_supported": "2/6",
+      "rated_unsupported": 0
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 219.5,
+      "cost_usd": 0.5239,
+      "answered": 12.5,
+      "insufficient_evidence": 9.5,
+      "quotes_verified": "90/90",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 0,
+      "rated_supported": "2/8",
+      "rated_unsupported": 1
     },
     {
       "case": "default-insurer",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 52,
@@ -723,11 +2729,31 @@
       "quotes_verified": "57/57",
       "recommendations": 4,
       "recall": null,
-      "failed_calls": 1
+      "failed_calls": 1,
+      "rated_supported": "2/6",
+      "rated_unsupported": 0
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 135,
+      "cost_usd": 0.2171,
+      "answered": 11,
+      "insufficient_evidence": 11,
+      "quotes_verified": "62/62",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 0,
+      "rated_supported": "1/6",
+      "rated_unsupported": 0
     },
     {
       "case": "default-insurer",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 57.5,
@@ -737,11 +2763,31 @@
       "quotes_verified": "46/46",
       "recommendations": 4,
       "recall": null,
-      "failed_calls": 1
+      "failed_calls": 1,
+      "rated_supported": "1/8",
+      "rated_unsupported": 1
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 214,
+      "cost_usd": 0.0262,
+      "answered": 10.5,
+      "insufficient_evidence": 11.5,
+      "quotes_verified": "67/67",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 0,
+      "rated_supported": "0/7",
+      "rated_unsupported": 1
     },
     {
       "case": "customer-a",
       "model": "claude-opus-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 168.5,
@@ -754,11 +2800,34 @@
         1.0,
         1.0
       ],
-      "failed_calls": 0
+      "failed_calls": 0,
+      "rated_supported": "8/16",
+      "rated_unsupported": 1
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 483.5,
+      "cost_usd": 1.3074,
+      "answered": 20.5,
+      "insufficient_evidence": 1.5,
+      "quotes_verified": "296/296",
+      "recommendations": 10,
+      "recall": [
+        1.0,
+        1.0
+      ],
+      "failed_calls": 0,
+      "rated_supported": "7/16",
+      "rated_unsupported": 2
     },
     {
       "case": "customer-a",
       "model": "claude-sonnet-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 86.5,
@@ -771,11 +2840,34 @@
         1.0,
         1.0
       ],
-      "failed_calls": 0
+      "failed_calls": 0,
+      "rated_supported": "4/15",
+      "rated_unsupported": 0
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 274,
+      "cost_usd": 0.4965,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes_verified": "200/200",
+      "recommendations": 10,
+      "recall": [
+        1.0,
+        1.0
+      ],
+      "failed_calls": 0,
+      "rated_supported": "7/16",
+      "rated_unsupported": 1
     },
     {
       "case": "customer-a",
       "model": "claude-haiku-5-5",
+      "effort": "medium",
       "runs": 2,
       "completed": 2,
       "seconds": 118,
@@ -785,10 +2877,32 @@
       "quotes_verified": "106/106",
       "recommendations": 8.5,
       "recall": [
+        0.9,
+        1.0
+      ],
+      "failed_calls": 1,
+      "rated_supported": "4/16",
+      "rated_unsupported": 3
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "effort": "xhigh",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 371.5,
+      "cost_usd": 0.0513,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes_verified": "164/164",
+      "recommendations": 9.5,
+      "recall": [
         1.0,
         1.0
       ],
-      "failed_calls": 1
+      "failed_calls": 0,
+      "rated_supported": "7/16",
+      "rated_unsupported": 2
     }
   ]
 }
