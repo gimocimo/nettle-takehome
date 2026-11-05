@@ -4,18 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch, orgPath } from "@/lib/api";
 import { useOrg } from "@/lib/session";
+import { ACTIVE_STATUSES, ReportSummary } from "@/lib/reports";
+import { Progress, StatusBadge } from "@/components/reports";
 
-interface Report {
-  id: string;
-  assessment: string;
-  assessment_title: string;
-  title: string;
-  status: string;
-  created_at: string;
-}
 
 export default function ReportsPage() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { org } = useOrg();
@@ -60,20 +54,9 @@ export default function ReportsPage() {
                 <td className="px-4 py-3 text-gray-600">
                   {r.assessment_title}
                 </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                      r.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : r.status === "generating"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : r.status === "failed"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {r.status}
-                  </span>
+                <td className="px-4 py-3 space-y-1">
+                  <StatusBadge status={r.status} />
+                  {ACTIVE_STATUSES.includes(r.status) && <Progress report={r} />}
                 </td>
                 <td className="px-4 py-3 text-gray-600">
                   {new Date(r.created_at).toLocaleDateString()}

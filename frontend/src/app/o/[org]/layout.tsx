@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useOrg, useSession } from "@/lib/session";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
   const { me, loading, logout } = useSession();
@@ -67,6 +68,7 @@ export default function OrganizationLayout({ children }: { children: React.React
             ))}
           </div>
           <div className="ml-auto flex items-center gap-4 text-sm">
+            <NotificationBell org={org} />
             <span className="text-gray-600">
               {me.user.name}{" "}
               <span className="text-xs uppercase tracking-wide bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">

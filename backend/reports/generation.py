@@ -181,6 +181,7 @@ def _citations(raw_citations, by_label):
                 "evidence_id": evidence.evidence_id,
                 "label": evidence.label,
                 "title": evidence.title,
+                "kind": evidence.kind,
                 "quote": quote,
                 "verified": quote_is_verified(quote, evidence.searchable_text) if quote else None,
             }
