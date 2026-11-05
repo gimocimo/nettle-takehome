@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 
 interface Client {
   id: string;
@@ -18,25 +19,31 @@ interface Client {
 export default function PortfolioPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { org, canWrite } = useOrg();
 
   useEffect(() => {
-    apiFetch("/api/portfolio/clients/")
+    apiFetch(orgPath(org, "portfolio/clients/"))
       .then(setClients)
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [org]);
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Portfolio</h1>
-        <Link
-          href="/portfolio/new"
-          className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"
-        >
-          Add Client
-        </Link>
+        {canWrite && (
+          <Link
+            href={`/o/${org}/portfolio/new`}
+            className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"
+          >
+            Add Client
+          </Link>
+        )}
       </div>
       <div className="bg-white rounded-lg border border-gray-200">
         <table className="w-full text-sm">
@@ -56,7 +63,7 @@ export default function PortfolioPage() {
               >
                 <td className="px-4 py-3">
                   <Link
-                    href={`/portfolio/${client.id}`}
+                    href={`/o/${org}/portfolio/${client.id}`}
                     className="text-blue-600 hover:underline"
                   >
                     {client.name}

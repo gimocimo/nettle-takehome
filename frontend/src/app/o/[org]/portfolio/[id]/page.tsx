@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiFetch, apiDelete } from "@/lib/api";
+import { apiFetch, apiDelete, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 import Link from "next/link";
 
 interface Client {
@@ -47,11 +48,16 @@ export default function ClientDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [client, setClient] = useState<Client | null>(null);
+  const [error, setError] = useState("");
+  const { org, canWrite } = useOrg();
 
   useEffect(() => {
-    apiFetch(`/api/portfolio/clients/${id}/`).then(setClient);
-  }, [id]);
+    apiFetch(orgPath(org, `portfolio/clients/${id}/`))
+      .then(setClient)
+      .catch((err) => setError(err.message));
+  }, [org, id]);
 
+  if (error) return <p className="text-red-600">{error}</p>;
   if (!client) return <p className="text-gray-500">Loading...</p>;
 
   return (
@@ -59,24 +65,26 @@ export default function ClientDetailPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <Link
-            href="/portfolio"
+            href={`/o/${org}/portfolio`}
             className="text-sm text-gray-500 hover:text-gray-700"
           >
             ← Portfolio
           </Link>
           <h1 className="text-2xl font-bold mt-1">{client.name}</h1>
         </div>
-        <button
-          onClick={async () => {
-            if (confirm("Delete this client?")) {
-              await apiDelete(`/api/portfolio/clients/${id}/`);
-              router.push("/portfolio");
-            }
-          }}
-          className="text-red-600 text-sm hover:underline"
-        >
-          Delete
-        </button>
+        {canWrite && (
+          <button
+            onClick={async () => {
+              if (confirm("Delete this client?")) {
+                await apiDelete(orgPath(org, `portfolio/clients/${id}/`));
+                router.push(`/o/${org}/portfolio`);
+              }
+            }}
+            className="text-red-600 text-sm hover:underline"
+          >
+            Delete
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">

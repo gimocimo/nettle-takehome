@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 
 interface Report {
   id: string;
@@ -19,17 +20,22 @@ interface Report {
 export default function ReportDetailPage() {
   const { id } = useParams();
   const [report, setReport] = useState<Report | null>(null);
+  const [error, setError] = useState("");
+  const { org } = useOrg();
 
   useEffect(() => {
-    apiFetch(`/api/reports/${id}/`).then(setReport);
-  }, [id]);
+    apiFetch(orgPath(org, `reports/${id}/`))
+      .then(setReport)
+      .catch((err) => setError(err.message));
+  }, [org, id]);
 
+  if (error) return <p className="text-red-600">{error}</p>;
   if (!report) return <p className="text-gray-500">Loading...</p>;
 
   return (
     <div>
       <Link
-        href="/reports"
+        href={`/o/${org}/reports`}
         className="text-sm text-gray-500 hover:text-gray-700"
       >
         ← Reports

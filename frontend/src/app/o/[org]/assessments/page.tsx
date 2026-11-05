@@ -2,84 +2,96 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 
-interface Report {
+interface Assessment {
   id: string;
-  assessment: string;
-  assessment_title: string;
   title: string;
+  client: string;
+  client_name: string;
   status: string;
+  assessment_date: string | null;
   created_at: string;
 }
 
-export default function ReportsPage() {
-  const [reports, setReports] = useState<Report[]>([]);
+export default function AssessmentsPage() {
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { org, canWrite } = useOrg();
 
   useEffect(() => {
-    apiFetch("/api/reports/")
-      .then(setReports)
+    apiFetch(orgPath(org, "assessments/"))
+      .then(setAssessments)
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [org]);
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Reports</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Assessments</h1>
+        {canWrite && (
+          <Link
+            href={`/o/${org}/assessments/new`}
+            className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"
+          >
+            New Assessment
+          </Link>
+        )}
+      </div>
       <div className="bg-white rounded-lg border border-gray-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
               <th className="px-4 py-3 font-medium">Title</th>
-              <th className="px-4 py-3 font-medium">Assessment</th>
+              <th className="px-4 py-3 font-medium">Client</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Created</th>
+              <th className="px-4 py-3 font-medium">Date</th>
             </tr>
           </thead>
           <tbody>
-            {reports.map((r) => (
+            {assessments.map((a) => (
               <tr
-                key={r.id}
+                key={a.id}
                 className="border-b border-gray-100 hover:bg-gray-50"
               >
                 <td className="px-4 py-3">
                   <Link
-                    href={`/reports/${r.id}`}
+                    href={`/o/${org}/assessments/${a.id}`}
                     className="text-blue-600 hover:underline"
                   >
-                    {r.title || "Untitled"}
+                    {a.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-gray-600">
-                  {r.assessment_title}
-                </td>
+                <td className="px-4 py-3 text-gray-600">{a.client_name}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                      r.status === "completed"
+                      a.status === "completed"
                         ? "bg-green-100 text-green-700"
-                        : r.status === "generating"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : r.status === "failed"
-                        ? "bg-red-100 text-red-700"
+                        : a.status === "in_progress"
+                        ? "bg-blue-100 text-blue-700"
                         : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {r.status}
+                    {a.status.replace("_", " ")}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-gray-600">
-                  {new Date(r.created_at).toLocaleDateString()}
+                  {a.assessment_date || "—"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {reports.length === 0 && (
+        {assessments.length === 0 && (
           <p className="text-gray-400 text-center py-8">
-            No reports yet. Generate one from an assessment.
+            No assessments yet.
           </p>
         )}
       </div>

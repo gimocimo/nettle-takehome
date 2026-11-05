@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiFetch, apiPost } from "@/lib/api";
+import { apiFetch, apiPost, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 
 interface Client {
   id: string;
@@ -12,6 +13,8 @@ interface Client {
 
 export default function NewAssessmentPage() {
   const router = useRouter();
+  const { org } = useOrg();
+  const [error, setError] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [form, setForm] = useState({
     title: "",
@@ -22,22 +25,26 @@ export default function NewAssessmentPage() {
   });
 
   useEffect(() => {
-    apiFetch("/api/portfolio/clients/").then(setClients);
-  }, []);
+    apiFetch(orgPath(org, "portfolio/clients/")).then(setClients);
+  }, [org]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await apiPost("/api/assessments/", {
-      ...form,
-      assessment_date: form.assessment_date || null,
-    });
-    router.push(`/assessments/${result.id}`);
+    try {
+      const result = await apiPost(orgPath(org, "assessments/"), {
+        ...form,
+        assessment_date: form.assessment_date || null,
+      });
+      router.push(`/o/${org}/assessments/${result.id}`);
+    } catch (err) {
+      setError((err as Error).message);
+    }
   };
 
   return (
     <div className="max-w-xl">
       <Link
-        href="/assessments"
+        href={`/o/${org}/assessments`}
         className="text-sm text-gray-500 hover:text-gray-700"
       >
         ← Assessments
@@ -100,6 +107,7 @@ export default function NewAssessmentPage() {
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
           />
         </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"

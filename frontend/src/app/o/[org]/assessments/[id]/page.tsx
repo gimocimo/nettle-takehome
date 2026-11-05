@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { apiFetch, apiPost, apiUpload, API_BASE } from "@/lib/api";
+import { apiFetch, apiPost, apiUpload, API_BASE, csrfHeaders, orgPath } from "@/lib/api";
+import { useOrg } from "@/lib/session";
 
 interface Assessment {
   id: string;
@@ -23,7 +24,8 @@ interface EvidenceItem {
   title: string;
   description: string;
   text_content: string;
-  file: string | null;
+  file_url: string | null;
+  original_filename: string;
   created_at: string;
 }
 
@@ -42,12 +44,13 @@ export default function AssessmentDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [streamContent, setStreamContent] = useState("");
   const streamRef = useRef<HTMLDivElement>(null);
+  const { org, canWrite } = useOrg();
 
   useEffect(() => {
-    apiFetch(`/api/assessments/${id}/`).then(setAssessment);
-    apiFetch(`/api/evidence/?assessment=${id}`).then(setEvidence);
-    apiFetch(`/api/reports/?assessment=${id}`).then(setReports);
-  }, [id]);
+    apiFetch(orgPath(org, `assessments/${id}/`)).then(setAssessment);
+    apiFetch(orgPath(org, `evidence/?assessment=${id}`)).then(setEvidence);
+    apiFetch(orgPath(org, `reports/?assessment=${id}`)).then(setReports);
+  }, [org, id]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,8 +62,8 @@ export default function AssessmentDetailPage() {
     formData.append("title", file.name);
 
     try {
-      await apiUpload("/api/evidence/", formData);
-      apiFetch(`/api/evidence/?assessment=${id}`).then(setEvidence);
+      await apiUpload(orgPath(org, "evidence/"), formData);
+      apiFetch(orgPath(org, `evidence/?assessment=${id}`)).then(setEvidence);
     } catch (err) {
       alert((err as Error).message);
     } finally {
@@ -72,21 +75,19 @@ export default function AssessmentDetailPage() {
     const text = prompt("Enter observation note:");
     if (!text) return;
 
-    await apiPost("/api/evidence/", {
+    await apiPost(orgPath(org, "evidence/"), {
       assessment: id,
-      evidence_type: "note",
       title: "Field observation",
       text_content: text,
     });
-    apiFetch(`/api/evidence/?assessment=${id}`).then(setEvidence);
+    apiFetch(orgPath(org, `evidence/?assessment=${id}`)).then(setEvidence);
   };
 
   const handleGenerate = async () => {
     // Create a new report first
-    const report = await apiPost("/api/reports/", {
+    const report = await apiPost(orgPath(org, "reports/"), {
       assessment: id,
       title: "",
-      status: "pending",
     });
 
     setGenerating(true);
@@ -94,8 +95,8 @@ export default function AssessmentDetailPage() {
 
     // Stream the generation via SSE
     const response = await fetch(
-      `${API_BASE}/api/reports/${report.id}/generate/`,
-      { method: "POST" }
+      `${API_BASE}${orgPath(org, `reports/${report.id}/generate/`)}`,
+      { method: "POST", credentials: "include", headers: await csrfHeaders() }
     );
 
     const reader = response.body?.getReader();
@@ -122,7 +123,7 @@ export default function AssessmentDetailPage() {
               }
             } else if (data.type === "done") {
               setGenerating(false);
-              apiFetch(`/api/reports/?assessment=${id}`).then(setReports);
+              apiFetch(orgPath(org, `reports/?assessment=${id}`)).then(setReports);
             } else if (data.type === "error") {
               setGenerating(false);
               alert(`Generation failed: ${data.message}`);
@@ -138,7 +139,7 @@ export default function AssessmentDetailPage() {
   return (
     <div>
       <Link
-        href="/assessments"
+        href={`/o/${org}/assessments`}
         className="text-sm text-gray-500 hover:text-gray-700"
       >
         ← Assessments
@@ -154,7 +155,7 @@ export default function AssessmentDetailPage() {
         <section className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold">Evidence ({evidence.length})</h2>
-            <div className="flex gap-2">
+            <div className={canWrite ? "flex gap-2" : "hidden"}>
               <button
                 onClick={handleAddNote}
                 className="text-sm px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-50"
@@ -189,8 +190,15 @@ export default function AssessmentDetailPage() {
                     {e.text_content}
                   </p>
                 )}
-                {e.file && (
-                  <p className="text-xs text-blue-600">{e.file.split("/").pop()}</p>
+                {e.file_url && (
+                  <a
+                    href={e.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    {e.original_filename || "Open file"}
+                  </a>
                 )}
               </div>
             ))}
@@ -208,7 +216,7 @@ export default function AssessmentDetailPage() {
             <h2 className="font-semibold">Reports</h2>
             <button
               onClick={handleGenerate}
-              disabled={generating || evidence.length === 0}
+              disabled={!canWrite || generating || evidence.length === 0}
               className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {generating ? "Generating..." : "Generate Report"}
@@ -237,7 +245,7 @@ export default function AssessmentDetailPage() {
               .map((r) => (
                 <Link
                   key={r.id}
-                  href={`/reports/${r.id}`}
+                  href={`/o/${org}/reports/${r.id}`}
                   className="block p-3 rounded border border-gray-100 bg-gray-50 hover:bg-gray-100"
                 >
                   <div className="text-sm font-medium">{r.title || "Untitled report"}</div>
