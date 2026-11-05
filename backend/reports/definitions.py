@@ -119,3 +119,53 @@ def section_output_schema(section: SectionSpec):
         "required": [q.key for q in section.questions],
         "additionalProperties": False,
     }
+
+
+# --- engineers' edits ------------------------------------------------------------
+
+
+def validate_answer_value(question: Question, value, ai_value):
+    """Validate an engineer's edit against the question's type. Raises ValueError."""
+    if question.type in ("text", "long_text"):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Enter some text.")
+        return value.strip()
+    if question.type in ("choice", "rating"):
+        if value not in question.options:
+            raise ValueError(f"Choose one of: {', '.join(question.options)}.")
+        return value
+    if question.type == "number":
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("Enter a number.")
+        return value
+    return _validate_recommendations(value, ai_value)
+
+
+def _validate_recommendations(value, ai_value):
+    if not isinstance(value, list):
+        raise ValueError("Expected a list of recommendations.")
+    # Engineers can keep, drop or reorder the AI's citations but not invent new ones:
+    # a citation's "verified" flag must only ever come from the server's own check.
+    known = {
+        (c["evidence_id"], c["quote"]): c
+        for item in (ai_value if isinstance(ai_value, list) else [])
+        for c in item.get("citations", [])
+    }
+    cleaned = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise ValueError("Each recommendation must be an object.")
+        title, observation, action = (str(item.get(k, "")).strip() for k in ("title", "observation", "action"))
+        if not title or not action:
+            raise ValueError("Each recommendation needs a title and an action.")
+        if item.get("priority") not in PRIORITIES:
+            raise ValueError(f"Priority must be one of {', '.join(PRIORITIES)}.")
+        citations = [
+            known[(c.get("evidence_id"), c.get("quote"))]
+            for c in item.get("citations", []) or []
+            if isinstance(c, dict) and (c.get("evidence_id"), c.get("quote")) in known
+        ]
+        cleaned.append(
+            {"title": title, "observation": observation, "action": action, "priority": item["priority"], "citations": citations}
+        )
+    return cleaned

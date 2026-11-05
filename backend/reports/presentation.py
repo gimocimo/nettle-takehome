@@ -48,14 +48,29 @@ def evidence_gaps(report):
     return gaps
 
 
+def review_summary(report):
+    """How much engineers changed the AI's draft: a quality signal per report (and,
+    aggregated per question across reports, a way to find questions the AI gets wrong)."""
+    answers = list(report.answers.all())
+    return {"answers": len(answers), "edited": sum(1 for a in answers if a.edited_at is not None)}
+
+
 def _answer(answer):
     if answer is None:
         return None
+    edited = answer.edited_at is not None
     return {
         "status": answer.status,
         "value": answer.value,
         "confidence": answer.confidence,
         "citations": answer.citations,
         "missing_evidence": answer.missing_evidence,
-        "edited": answer.value != answer.ai_value,
+        "edited": edited,
+        "edited_by": _name(answer.edited_by) if edited else None,
+        "edited_at": answer.edited_at,
+        "ai_value": answer.ai_value if edited else None,  # the AI's draft, for comparison
     }
+
+
+def _name(user):
+    return (user.get_full_name() or user.email) if user else None

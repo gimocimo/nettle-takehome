@@ -1,4 +1,6 @@
 from django.db import IntegrityError, transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -8,7 +10,9 @@ from ai.budget import budget_status
 from nettle_core.params import uuid_query_param
 from tenancy.api import OrganizationScopedViewSet
 
+from .definitions import validate_answer_value
 from .models import Report, ReportTemplate
+from .presentation import _answer
 from .serializers import (
     ReportCreateSerializer,
     ReportListSerializer,
@@ -82,6 +86,42 @@ class ReportViewSet(OrganizationScopedViewSet):
         report.save(update_fields=["status", "error_message", "finished_at", "updated_at"])
         generate_report_task.enqueue(organization_id=str(report.organization_id), report_id=str(report.id))
         return Response(ReportSerializer(report, context=self.get_serializer_context()).data, status=status.HTTP_202_ACCEPTED)
+
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path=r"answers/(?P<section_key>[a-z0-9-]+)/(?P<question_key>[a-z0-9_]+)",
+    )
+    def edit_answer(self, request, pk=None, section_key=None, question_key=None, **kwargs):
+        """An engineer corrects or completes an answer. The AI's draft (ai_value) is kept."""
+        report = self.get_object()
+        if report.status != "completed":
+            raise ValidationError("Only completed reports that haven't been issued can be edited.")
+        answer = get_object_or_404(report.answers, section_key=section_key, question_key=question_key)
+        section = next(s for s in report.template.ordered_sections() if s.key == section_key)
+        question = next(q for q in section.spec.questions if q.key == question_key)
+        try:
+            value = validate_answer_value(question, request.data.get("value"), answer.ai_value)
+        except ValueError as exc:
+            raise ValidationError({"value": [str(exc)]})
+        answer.value = value
+        answer.status = "answered"
+        answer.missing_evidence = ""
+        answer.edited_by = request.user
+        answer.edited_at = timezone.now()
+        answer.save(update_fields=["value", "status", "missing_evidence", "edited_by", "edited_at"])
+        return Response(_answer(answer))
+
+    @action(detail=True, methods=["post"])
+    def issue(self, request, pk=None, **kwargs):
+        """Approve the report: it becomes final and locked."""
+        report = self.get_object()
+        if report.status != "completed":
+            raise ValidationError("Only completed reports can be issued.")
+        report.status, report.issued_by, report.issued_at = "issued", request.user, timezone.now()
+        report.save(update_fields=["status", "issued_by", "issued_at", "updated_at"])
+        return Response(ReportSerializer(report, context=self.get_serializer_context()).data)
 
 
 class ReportTemplateViewSet(OrganizationScopedViewSet):

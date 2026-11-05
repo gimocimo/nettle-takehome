@@ -120,6 +120,7 @@ class Report(models.Model):
         ("completed", "Completed"),
         ("failed", "Failed"),
         ("cancelled", "Cancelled"),
+        ("issued", "Issued"),  # approved by an engineer; locked
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -151,6 +152,10 @@ class Report(models.Model):
     cache_read_tokens = models.PositiveIntegerField(default=0)
     cache_write_tokens = models.PositiveIntegerField(default=0)
     cost_usd = models.DecimalField(max_digits=12, decimal_places=6, null=True, blank=True)
+    issued_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    issued_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -180,9 +185,8 @@ class Report(models.Model):
         return f"Report: {self.title or self.assessment.title}"
 
 
-# PROPOSED (not built): human review - PATCH an answer's value (ai_value stays as the
-# draft), mark sections reviewed, and "issue" the report once every answer is
-# reviewed, recording who approved what and when.
+# PROPOSED (not built): a "four-eyes" rule per organization (the engineer who issues a
+# report must not be the one who requested it), and per-section review states.
 class ReportAnswer(models.Model):
     """One answered question of a structured report.
 
@@ -207,6 +211,10 @@ class ReportAnswer(models.Model):
     # [{"evidence_id": uuid, "label": "E3", "title": ..., "quote": ..., "verified": bool | None}]
     citations = models.JSONField(default=list)
     missing_evidence = models.TextField(blank=True, default="")
+    edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    edited_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

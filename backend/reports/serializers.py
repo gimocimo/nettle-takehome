@@ -4,7 +4,7 @@ from evidence.models import Evidence
 from tenancy.api import OrganizationScopedSerializer
 
 from .models import Report, ReportTemplate
-from .presentation import evidence_gaps, report_sections
+from .presentation import _name, evidence_gaps, report_sections, review_summary
 
 
 def _template_summary(report):
@@ -31,6 +31,7 @@ class ReportListSerializer(serializers.ModelSerializer):
             "progress_total",
             "current_section",
             "error_message",
+            "issued_at",
             "created_at",
         ]
 
@@ -44,6 +45,8 @@ class ReportSerializer(ReportListSerializer):
     sections = serializers.SerializerMethodField()
     evidence_gaps = serializers.SerializerMethodField()
     usage = serializers.SerializerMethodField()
+    issued_by = serializers.SerializerMethodField()
+    review = serializers.SerializerMethodField()
 
     class Meta(ReportListSerializer.Meta):
         fields = ReportListSerializer.Meta.fields + [
@@ -55,6 +58,8 @@ class ReportSerializer(ReportListSerializer):
             "sections",
             "evidence_gaps",
             "usage",
+            "issued_by",
+            "review",
         ]
         read_only_fields = [field for field in fields if field != "title"]
 
@@ -63,6 +68,12 @@ class ReportSerializer(ReportListSerializer):
 
     def get_evidence_gaps(self, report):
         return evidence_gaps(report)
+
+    def get_issued_by(self, report):
+        return _name(report.issued_by)
+
+    def get_review(self, report):
+        return review_summary(report)
 
     def get_usage(self, report):
         return {
