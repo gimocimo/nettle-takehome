@@ -164,3 +164,9 @@ def test_calls_that_never_reached_the_model_cost_nothing(report, monkeypatch):
     with pytest.raises(LLMError):
         generate_report(report.organization, report.id)
     assert not AIUsage.objects.filter(report=report).exists()
+
+
+def test_every_call_uses_the_reports_effort(report, fake_llm):
+    Report.objects.filter(pk=report.pk).update(ai_effort="xhigh")
+    generate_report(report.organization, report.id)
+    assert {call["effort"] for call in fake_llm.calls} == {"xhigh"}

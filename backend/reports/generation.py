@@ -90,6 +90,7 @@ def generate_report(organization, report_id):
         try:
             result = client.generate_json(
                 model=report.ai_model,
+                effort=report.ai_effort or None,
                 system=system,
                 content=[*prefix, {"type": "text", "text": _section_instruction(spec, previous)}],
                 schema=schema,

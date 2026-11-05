@@ -78,6 +78,7 @@ class ReportSerializer(ReportListSerializer):
     def get_usage(self, report):
         return {
             "model": report.ai_model,
+            "effort": report.ai_effort or None,
             "input_tokens": report.input_tokens,
             "output_tokens": report.output_tokens,
             "cache_read_tokens": report.cache_read_tokens,

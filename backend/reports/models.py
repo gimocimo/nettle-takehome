@@ -138,6 +138,9 @@ class Report(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     language = models.CharField(max_length=16, blank=True, default="")
     ai_model = models.CharField(max_length=64, blank=True, default="")
+    # The reasoning effort it was generated with (provenance, like the model); empty on
+    # reports created before it was recorded, which used the deployment's AI_EFFORT.
+    ai_effort = models.CharField(max_length=16, blank=True, default="")
     requested_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )

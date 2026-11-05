@@ -7,7 +7,7 @@ from ai.testing import FakeLLM
 from jobs.models import Job
 from jobs.worker import run_worker
 from nettle_core.testing import drain_jobs, make_assessment, make_client, make_note, make_org, org_url
-from reports.models import ReportTemplate
+from reports.models import Report, ReportTemplate
 from tenancy.models import Membership, Organization
 
 
@@ -145,3 +145,9 @@ def test_a_failed_report_can_be_retried_and_resumes(env):
 def test_the_template_list_shows_only_this_organizations_active_templates(env):
     keys = {t["key"] for t in env.engineer.get(org_url(env.org, "templates/")).data}
     assert keys == {"standard-risk-report", "property-cope-survey"}
+
+
+def test_new_reports_record_the_effort_they_are_generated_with(env, settings):
+    settings.AI_EFFORT = "high"
+    report_id = _start(env).data["id"]
+    assert Report.objects.get(pk=report_id).ai_effort == "high"

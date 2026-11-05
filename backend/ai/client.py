@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 # timeout, conflict, rate limit. The same set the SDK's own quick retries use.
 TRANSIENT_STATUS_CODES = {408, 409, 429}
 
+# Output budget per call, thinking included: higher effort thinks longer, and an answer
+# cut off at max_tokens is a billed failure.
+TRANSIENT_ERROR_TYPES = {"overloaded_error", "api_error", "rate_limit_error", "timeout_error"}
+
+MAX_TOKENS_BY_EFFORT = {"low": 16000, "medium": 16000, "high": 32000, "xhigh": 64000, "max": 64000}
+
 
 # PROPOSED (not built): a provider interface (Anthropic / OpenAI / Google, as Nettle
 # offers) chosen per organization, and regional routing for data residency: the
@@ -53,30 +59,33 @@ class AnthropicClient:
         )
         # The SDK already retries 429/5xx/connection errors twice with backoff.
         self._client = anthropic.Anthropic(
-            api_key=settings.ANTHROPIC_API_KEY, max_retries=2, timeout=300.0, default_headers=headers
+            api_key=settings.ANTHROPIC_API_KEY, max_retries=2, timeout=600.0, default_headers=headers
         )
 
-    def generate_json(self, *, model, system, content, schema, max_tokens=16000):
+    def generate_json(self, *, model, system, content, schema, effort=None, max_tokens=None):
         """One structured-output call: the response is guaranteed to match `schema`.
         Callers keep `schema` identical across related calls: it is part of the
         cached prompt prefix."""
+        effort = effort or settings.AI_EFFORT
+        max_tokens = max_tokens or MAX_TOKENS_BY_EFFORT.get(effort, 16000)
         try:
-            response = self._client.messages.create(
+            # Streamed: at high effort a call can think for minutes, and the SDK refuses
+            # non-streaming calls that might run past ten minutes.
+            with self._client.messages.stream(
                 model=model,
                 max_tokens=max_tokens,
                 system=system,
                 messages=[{"role": "user", "content": content}],
                 output_config={
-                    "effort": settings.AI_EFFORT,
+                    "effort": effort,
                     "format": {"type": "json_schema", "schema": schema},
                 },
-            )
+            ) as stream:
+                response = stream.get_final_message()
         except anthropic.APIConnectionError as exc:  # timeouts included
             raise LLMError(f"AI provider temporarily unavailable ({type(exc).__name__}).", transient=True) from exc
         except anthropic.APIStatusError as exc:
-            # By status code, not exception class: the SDK raises 529 "overloaded" as
-            # OverloadedError, a direct APIStatusError subclass, not an InternalServerError.
-            if exc.status_code in TRANSIENT_STATUS_CODES or exc.status_code >= 500:
+            if _is_transient(exc):
                 raise LLMError(f"AI provider temporarily unavailable ({type(exc).__name__}).", transient=True) from exc
             logger.warning("AI request rejected: %s", exc)
             raise LLMError(f"AI request rejected ({exc.status_code}).", transient=False) from exc
@@ -99,6 +108,18 @@ class AnthropicClient:
         except json.JSONDecodeError as exc:
             raise LLMError("The AI returned malformed output.", transient=True, **billed) from exc
         return LLMResult(data=data, model=response.model, usage=usage)
+
+
+def _is_transient(exc):
+    """By status code, not exception class: the SDK raises 529 "overloaded" as
+    OverloadedError, a direct APIStatusError subclass, not an InternalServerError. An
+    error event in the middle of a stream arrives with the stream's 200 status, so its
+    type decides."""
+    if exc.status_code in TRANSIENT_STATUS_CODES or exc.status_code >= 500:
+        return True
+    body = exc.body if isinstance(exc.body, dict) else {}
+    error = body.get("error", body)
+    return isinstance(error, dict) and error.get("type") in TRANSIENT_ERROR_TYPES
 
 
 def get_client():

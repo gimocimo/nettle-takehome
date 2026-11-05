@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from django.utils.text import slugify
@@ -91,6 +92,7 @@ class ReportViewSet(OrganizationScopedViewSet):
                     status="queued",
                     language=template.language,
                     ai_model=serializer.validated_data.get("ai_model") or organization.effective_ai_model,
+                    ai_effort=settings.AI_EFFORT,
                     requested_by=request.user,
                     progress_total=len(template.ordered_sections()),
                 )

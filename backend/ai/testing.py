@@ -15,8 +15,8 @@ class FakeLLM:
         self.fail_on_call = fail_on_call  # 1-based call number that raises `failure`
         self.failure = failure or LLMError("AI provider temporarily unavailable (fake).", transient=True)
 
-    def generate_json(self, *, model, system, content, schema, max_tokens=16000):
-        self.calls.append({"model": model, "system": system, "content": content, "schema": schema})
+    def generate_json(self, *, model, system, content, schema, effort=None, max_tokens=None):
+        self.calls.append({"model": model, "effort": effort, "system": system, "content": content, "schema": schema})
         if self.fail_on_call == len(self.calls):
             raise self.failure
         instruction = content[-1]["text"]
