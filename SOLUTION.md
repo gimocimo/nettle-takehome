@@ -22,6 +22,7 @@ history shows the order and the pace), and checked against the real Claude API
 ([numbers below](#verified-with-real-claude-runs)). The tag `timebox-end` marks the
 end of the challenge work; anything after it is clearly labelled bonus material.
 Issues found after the deadline, and their fixes, are listed in [ERRATA.md](ERRATA.md).
+Bonus: [a model benchmark](docs/benchmark.md) of Opus, Sonnet and Haiku on two real assessments.
 
 ## Context
 

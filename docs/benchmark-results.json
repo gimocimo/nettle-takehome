@@ -1,0 +1,794 @@
+{
+  "runs": [
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "report_id": "315e38e7-8ba2-4402-95f2-8d16b5e71a49",
+      "status": "completed",
+      "error": "",
+      "seconds": 106,
+      "cost_usd": 0.275699,
+      "tokens": {
+        "input": 5803,
+        "output": 9699,
+        "cache_read": 56622,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 12,
+      "insufficient_evidence": 10,
+      "quotes": 36,
+      "quotes_verified": 36,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-opus-5-5",
+        "status": "completed",
+        "seconds": 106,
+        "cost_usd": 0.275699,
+        "answered": 12,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "report_id": "72fc54ac-999b-4374-af8d-0c81af9d126f",
+      "status": "completed",
+      "error": "",
+      "seconds": 173,
+      "cost_usd": 0.532172,
+      "tokens": {
+        "input": 13261,
+        "output": 18039,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 90,
+      "quotes_verified": 90,
+      "recommendations": 10,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Survey item 1 covers the high rack storage under the 14.7 m ceiling. It states that ceiling-only sprinklers cannot protect flammable liquids and aerosols at that height and asks to adapt the sprinkler concept to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Survey item 5 limits solid-piled ignitable liquids in the buffer areas under the 9.1 m ceiling to 1.5 m per FM 7-29. As an alternative it asks to adapt the storage and sprinkler concept, matching the expert action."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Survey item 6 sets the same container limits for flow-through racks (60 ml, 4 l if water-miscible). It also calls for a horizontal solid barrier under Scheme A per FM 7-29."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Survey item 4 keeps aerosols above Level 1 segregated, with vertical flue barriers and a solid barrier every second rack level. It also reserves dedicated rooms with adequate sprinklers for Level 2-3."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Survey item 8 asks for seismic bracing of sprinkler piping, earthquake design of the tanks and anchoring of racks to the floor, as the expert does."
+          }
+        ],
+        "unmatched_recommendations": [
+          2,
+          3,
+          7,
+          9,
+          10
+        ],
+        "judge_cost_usd": 0.027796
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-opus-5-5",
+        "status": "completed",
+        "seconds": 173,
+        "cost_usd": 0.532172,
+        "answered": 20,
+        "recommendations": 10,
+        "recall": 1.0
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "report_id": "20e4cf51-a680-4ffd-8c78-b0916f40030c",
+      "status": "completed",
+      "error": "",
+      "seconds": 48,
+      "cost_usd": 0.120711,
+      "tokens": {
+        "input": 5065,
+        "output": 7378,
+        "cache_read": 66059,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 10,
+      "insufficient_evidence": 12,
+      "quotes": 29,
+      "quotes_verified": 29,
+      "recommendations": 4,
+      "failed_calls": 1,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-sonnet-5-5",
+        "status": "completed",
+        "seconds": 48,
+        "cost_usd": 0.120711,
+        "answered": 10,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "report_id": "07263139-5277-4aed-bad9-1af7cfc841fc",
+      "status": "completed",
+      "error": "",
+      "seconds": 89,
+      "cost_usd": 0.194736,
+      "tokens": {
+        "input": 9514,
+        "output": 10508,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 58,
+      "quotes_verified": 58,
+      "recommendations": 9,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Same hazard (flammable liquids/aerosols in 14.7 m high racks, no ceiling-only solution) and same action: adapt the sprinkler concept to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Asks to limit solid-piled buffer stacks under the 9.1 m ceiling to 1.5 m per FM 7-29, or to adapt the storage and sprinkler concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Same container limits (60 ml; 4 l if miscible) and Scheme A with a horizontal solid barrier for the flow-through racks."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Same segregation measures: vertical flue barrier, solid barrier every second level, and dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Same three actions: brace sprinkler piping, design tanks for earthquakes, and anchor racks to the ground."
+          }
+        ],
+        "unmatched_recommendations": [
+          3,
+          6,
+          7,
+          9
+        ],
+        "judge_cost_usd": 0.020968
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-sonnet-5-5",
+        "status": "completed",
+        "seconds": 89,
+        "cost_usd": 0.194736,
+        "answered": 20,
+        "recommendations": 9,
+        "recall": 1.0
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "report_id": "6add9416-dcf0-4fa0-89f2-0e986b8359fc",
+      "status": "completed",
+      "error": "",
+      "seconds": 41,
+      "cost_usd": 0.011319,
+      "tokens": {
+        "input": 4874,
+        "output": 17982,
+        "cache_read": 66059,
+        "cache_write": 9437
+      },
+      "answers": 22,
+      "answered": 9,
+      "insufficient_evidence": 13,
+      "quotes": 23,
+      "quotes_verified": 23,
+      "recommendations": 4,
+      "failed_calls": 1,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-haiku-5-5",
+        "status": "completed",
+        "seconds": 41,
+        "cost_usd": 0.011319,
+        "answered": 9,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "report_id": "af5ac915-05a4-4525-af71-7975402af61a",
+      "status": "completed",
+      "error": "",
+      "seconds": 120,
+      "cost_usd": 0.017702,
+      "tokens": {
+        "input": 8932,
+        "output": 26554,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 64,
+      "quotes_verified": 64,
+      "recommendations": 9,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              3
+            ],
+            "reason": "Survey item 3 covers the high rack storage under the 14.7 m ceiling with flammable liquids and aerosols. It asks for the same action: revise the sprinkler concept to suit the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Survey item 2 limits the solid piled buffer storage to 1.5 m and asks to adapt the storage and sprinkler concept, matching the expert action."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Survey item 7 limits container sizes per FM 7-29 Tab. 2.4.7.1 and applies Scheme A with a horizontal solid barrier. The specific sizes are not stated, but the cited table defines them."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Survey item 1 includes all three elements: dedicated rooms with adequate sprinklers for Level 2-3, a solid vertical barrier in the flue space, and a solid barrier above every second rack level."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Survey item 6 asks for bracing of the sprinkler piping, earthquake-designed tanks and racks anchored to the ground, matching all three expert actions."
+          }
+        ],
+        "unmatched_recommendations": [
+          4,
+          5,
+          8,
+          9
+        ],
+        "judge_cost_usd": 0.021056
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-haiku-5-5",
+        "status": "completed",
+        "seconds": 120,
+        "cost_usd": 0.017702,
+        "answered": 20,
+        "recommendations": 9,
+        "recall": 1.0
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "report_id": "655c63d8-d4c8-4097-b118-0eba621b4d6f",
+      "status": "completed",
+      "error": "",
+      "seconds": 107,
+      "cost_usd": 0.237825,
+      "tokens": {
+        "input": 6069,
+        "output": 10017,
+        "cache_read": 66059,
+        "cache_write": 0
+      },
+      "answers": 22,
+      "answered": 12,
+      "insufficient_evidence": 10,
+      "quotes": 38,
+      "quotes_verified": 38,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-opus-5-5",
+        "status": "completed",
+        "seconds": 107,
+        "cost_usd": 0.237825,
+        "answered": 12,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "report_id": "ff92fc80-74d0-410d-b892-3520d2e85cd7",
+      "status": "completed",
+      "error": "",
+      "seconds": 56,
+      "cost_usd": 0.083913,
+      "tokens": {
+        "input": 4877,
+        "output": 6095,
+        "cache_read": 66059,
+        "cache_write": 0
+      },
+      "answers": 22,
+      "answered": 10,
+      "insufficient_evidence": 12,
+      "quotes": 28,
+      "quotes_verified": 28,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-sonnet-5-5",
+        "status": "completed",
+        "seconds": 56,
+        "cost_usd": 0.083913,
+        "answered": 10,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "report_id": "79359d21-cae8-4227-a323-27d0f4f917be",
+      "status": "completed",
+      "error": "",
+      "seconds": 164,
+      "cost_usd": 0.405382,
+      "tokens": {
+        "input": 12014,
+        "output": 16530,
+        "cache_read": 133616,
+        "cache_write": 0
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 80,
+      "quotes_verified": 80,
+      "recommendations": 9,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Rec 2 matches the expert item: for high racks under the 14.7 m ceiling it says no ceiling-only solution works and asks to adapt the sprinkler concept to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Rec 5 limits solid piles in the buffer areas to 1.5 m per FM 7-29, or alternatively adapts the storage and sprinkler concept, as the expert asks."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Rec 6 sets the same container limits (60 ml, or 4 l for water-miscible liquids) and calls for Scheme A with a horizontal solid barrier."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Rec 4 asks for the same aerosol segregation: a vertical flue-space barrier, a barrier above every second rack level, and dedicated rooms for Level 2-3."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Rec 8 covers all three seismic actions: bracing the sprinkler piping, seismic design of the tanks and anchoring the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          1,
+          3,
+          7,
+          9
+        ],
+        "judge_cost_usd": 0.024608
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-opus-5-5",
+        "status": "completed",
+        "seconds": 164,
+        "cost_usd": 0.405382,
+        "answered": 20,
+        "recommendations": 9,
+        "recall": 1.0
+      }
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "report_id": "1b52f7bf-a7b5-435e-bf6d-f1e105cc7459",
+      "status": "completed",
+      "error": "",
+      "seconds": 74,
+      "cost_usd": 0.00802,
+      "tokens": {
+        "input": 4687,
+        "output": 13781,
+        "cache_read": 66059,
+        "cache_write": 0
+      },
+      "answers": 22,
+      "answered": 11,
+      "insufficient_evidence": 11,
+      "quotes": 23,
+      "quotes_verified": 23,
+      "recommendations": 4,
+      "failed_calls": 0,
+      "summary": {
+        "case": "default-insurer",
+        "model": "claude-haiku-5-5",
+        "status": "completed",
+        "seconds": 74,
+        "cost_usd": 0.00802,
+        "answered": 11,
+        "recommendations": 4,
+        "recall": null
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "report_id": "623b3387-c3ac-4a8f-a8e4-3bc4489aa24a",
+      "status": "completed",
+      "error": "",
+      "seconds": 84,
+      "cost_usd": 0.191904,
+      "tokens": {
+        "input": 8953,
+        "output": 10337,
+        "cache_read": 114528,
+        "cache_write": 19088
+      },
+      "answers": 22,
+      "answered": 19,
+      "insufficient_evidence": 3,
+      "quotes": 56,
+      "quotes_verified": 56,
+      "recommendations": 8,
+      "failed_calls": 0,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              1
+            ],
+            "reason": "Same hazard (flammable liquids/aerosols in high racks under 14.7 m) and same action: adapt the sprinkler concept to the stored goods."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Asks to limit solid-pile stacks in the buffer areas to 1.5 m per FM 7-29, or to adapt the storage and sprinkler concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Same container limits (60 ml; 4 l if miscible) and Scheme A with a horizontal solid barrier for the flow-through racks."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Same segregation of aerosols above Level 1 with vertical flue barriers, horizontal barriers every second level, and dedicated rooms for Level 2-3."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              8
+            ],
+            "reason": "Covers bracing of sprinkler piping, seismic design of the tanks, and anchoring the racks to the ground."
+          }
+        ],
+        "unmatched_recommendations": [
+          3,
+          4,
+          7
+        ],
+        "judge_cost_usd": 0.019848
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-sonnet-5-5",
+        "status": "completed",
+        "seconds": 84,
+        "cost_usd": 0.191904,
+        "answered": 19,
+        "recommendations": 8,
+        "recall": 1.0
+      }
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "report_id": "9398ceb6-aedb-4377-88f1-f1a07cf1d2dd",
+      "status": "completed",
+      "error": "",
+      "seconds": 116,
+      "cost_usd": 0.015214,
+      "tokens": {
+        "input": 9105,
+        "output": 25551,
+        "cache_read": 152704,
+        "cache_write": 0
+      },
+      "answers": 22,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes": 42,
+      "quotes_verified": 42,
+      "recommendations": 8,
+      "failed_calls": 1,
+      "judge": {
+        "recall": 1.0,
+        "verdicts": [
+          {
+            "expert_item": 1,
+            "verdict": "covered",
+            "matched_recommendations": [
+              2
+            ],
+            "reason": "Both call for adapting the sprinkler design for the flammable liquids and aerosols stored in the high racks under the 14.7 m ceiling."
+          },
+          {
+            "expert_item": 2,
+            "verdict": "covered",
+            "matched_recommendations": [
+              5
+            ],
+            "reason": "Both limit the solid-piled buffer storage to 1.5 m per FM 7-29, or else adapt the storage and protection concept."
+          },
+          {
+            "expert_item": 3,
+            "verdict": "covered",
+            "matched_recommendations": [
+              7
+            ],
+            "reason": "Both set the same container size limits (60 ml; 4 l if water-miscible) and require the horizontal barrier Scheme A per FM 7-29."
+          },
+          {
+            "expert_item": 4,
+            "verdict": "covered",
+            "matched_recommendations": [
+              4
+            ],
+            "reason": "Both require the vertical flue barrier, a barrier above every second rack level, and dedicated rooms with adequate sprinklers for Level 2-3 aerosols."
+          },
+          {
+            "expert_item": 5,
+            "verdict": "covered",
+            "matched_recommendations": [
+              6
+            ],
+            "reason": "Both call for bracing the sprinkler piping, seismic design of the tanks and anchoring the racks to the floor."
+          }
+        ],
+        "unmatched_recommendations": [
+          1,
+          3,
+          8
+        ],
+        "judge_cost_usd": 0.020504
+      },
+      "summary": {
+        "case": "customer-a",
+        "model": "claude-haiku-5-5",
+        "status": "completed",
+        "seconds": 116,
+        "cost_usd": 0.015214,
+        "answered": 20,
+        "recommendations": 8,
+        "recall": 1.0
+      }
+    }
+  ],
+  "summary": [
+    {
+      "case": "default-insurer",
+      "model": "claude-opus-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 106.5,
+      "cost_usd": 0.2568,
+      "answered": 12,
+      "insufficient_evidence": 10,
+      "quotes_verified": "74/74",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 0
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-sonnet-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 52,
+      "cost_usd": 0.1023,
+      "answered": 10,
+      "insufficient_evidence": 12,
+      "quotes_verified": "57/57",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 1
+    },
+    {
+      "case": "default-insurer",
+      "model": "claude-haiku-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 57.5,
+      "cost_usd": 0.0097,
+      "answered": 10,
+      "insufficient_evidence": 12,
+      "quotes_verified": "46/46",
+      "recommendations": 4,
+      "recall": null,
+      "failed_calls": 1
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-opus-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 168.5,
+      "cost_usd": 0.4688,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes_verified": "170/170",
+      "recommendations": 9.5,
+      "recall": [
+        1.0,
+        1.0
+      ],
+      "failed_calls": 0
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-sonnet-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 86.5,
+      "cost_usd": 0.1933,
+      "answered": 19.5,
+      "insufficient_evidence": 2.5,
+      "quotes_verified": "114/114",
+      "recommendations": 8.5,
+      "recall": [
+        1.0,
+        1.0
+      ],
+      "failed_calls": 0
+    },
+    {
+      "case": "customer-a",
+      "model": "claude-haiku-5-5",
+      "runs": 2,
+      "completed": 2,
+      "seconds": 118,
+      "cost_usd": 0.0165,
+      "answered": 20,
+      "insufficient_evidence": 2,
+      "quotes_verified": "106/106",
+      "recommendations": 8.5,
+      "recall": [
+        1.0,
+        1.0
+      ],
+      "failed_calls": 1
+    }
+  ]
+}

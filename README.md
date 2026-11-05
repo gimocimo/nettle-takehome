@@ -7,7 +7,8 @@ deployment, each with its own data, users, client fields, report templates,
 language, AI model and budget.
 
 **For the take-home write-up see [SOLUTION.md](SOLUTION.md).** Fixes made after the
-deadline are listed in [ERRATA.md](ERRATA.md).
+deadline are listed in [ERRATA.md](ERRATA.md), and a bonus
+[model benchmark](docs/benchmark.md) compares Opus, Sonnet and Haiku.
 
 ## Screenshots
 
