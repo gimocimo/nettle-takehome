@@ -8,11 +8,11 @@ explains what I built, why, what I deliberately left as a proposal, and what I f
 
 | Challenge | Status | In one line |
 |---|---|---|
-| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing. |
+| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing; engineers review, correct and issue the report. |
 | 2. Customisable client fields | ✅ Built | A per-organization field registry: built-in columns plus JSON custom fields, renamed / relaxed / hidden / extended from a reviewed YAML file. No model change per customer. |
 | 3. Background generation | ✅ Built | A Postgres job queue behind Django 6's Tasks API; resumable section-by-section generation; in-app, desktop, email and webhook notifications. |
 | 4. Multi-tenancy | ✅ Core built, 📝 regions proposed | Organizations, memberships and roles; organization in the URL; one scoped base class for every endpoint; Postgres row-level security underneath; an isolation test suite. |
-| Production issues | ✅ 22 fixed, 📝 14 documented | See [the review](#production-readiness-review). |
+| Production issues | ✅ 24 fixed, 📝 12 documented | See [the review](#production-readiness-review). Includes CI and production images. |
 
 In the code, `git grep PROPOSED` lists every extension point that is proposed but not built.
 
@@ -111,8 +111,13 @@ compiled from the section's questions):
 - **Prompt injection**: evidence is wrapped as untrusted data, can't close its own
   wrapper, and the system prompt says never to follow instructions inside it; the
   output is constrained by the schema anyway.
-- **Human review ready**: each answer stores the AI draft (`ai_value`) separately from
-  the shown value, so an engineer's edits are auditable and measurable.
+- **Human review.** An engineer edits any answer of a completed report. Each edit is
+  validated against the question's type; the AI's draft (`ai_value`) is kept and
+  shown next to the edit. Edited recommendations may keep or drop the AI's
+  citations but not add new ones (a "verified" quote must come from the server's
+  check). **Approve and issue** locks the report and records who issued it and when.
+  The report shows how many answers engineers edited: per report a review aid, and
+  across reports a measure of which questions the AI gets wrong.
 
 ### Repeatability and versioning
 
@@ -146,8 +151,9 @@ not the prose, is what makes reports comparable across sites.
   observations, then write sections from observations (scales to hundreds of photos,
   shows per-photo findings, cheaper per report). This mirrors Nettle's own
   "hazard detection → review → decision brief" flow.
-- **Human review**: edit answers, review sections, "issue" the report; measure how
-  often engineers change each question's AI draft to find weak questions.
+- **Review policy and analytics**: a "four-eyes" rule per organization (the issuer
+  must not be the requester), per-section review states, and a dashboard of how
+  often engineers change each question's AI draft, to find weak questions.
 - Natural-language template editing (proposed change → validated diff → preview),
   conditional questions, pre-filling answers from client fields, PDF/DOCX export, and
   an evaluation set built from known surveys (e.g. the Udine PDF's five recommendations).
@@ -401,37 +407,37 @@ trail, per-tenant API rate limits, and per-tenant encryption keys.
 | 19 | Any failed fetch left pages on "Loading…" forever; failed reports were hidden | Error states everywhere; all report statuses shown (`5e13505`, `38a2594`) |
 | 20 | SSE client broke multi-byte characters and dropped events split across chunks | SSE removed; progress by polling (`38a2594`) |
 | 21 | UK clients' money shown in `$`; a value of 0 shown as "—"; report Markdown shown raw | Organization currency, correct empty check, structured rendering (`8630494`, `38a2594`) |
-| 22 | No tests | 128 tests, including tenant isolation and RLS (throughout) |
+| 22 | No tests and no CI | 134 tests, including tenant isolation and RLS; GitHub Actions runs them, validates every customer's config and builds the frontend (throughout, `a0a1d99`) |
+| 23 | Containers ran the dev servers (`runserver`, `next dev`) as root, with `npm install` and a compiler in the image | Multi-stage images: gunicorn + WhiteNoise and the Next.js standalone server, non-root, `npm ci`; `docker-compose.prod.yaml` runs migrations as a one-off job before the app (`05c7ee5`) |
+| 24 | No human checkpoint between the AI's draft and the client | Engineers edit answers (AI draft kept), then approve and issue a locked report (`5e816f7`, `a29c145`) |
 
 ### Documented, not fixed
 
 | # | Problem | What production needs |
 |---|---|---|
-| 1 | Containers run dev servers (`runserver`, `next dev`) as root; `npm install` instead of `npm ci` | Multi-stage images: gunicorn/uvicorn, `next build && next start`, non-root users, pinned installs, health checks |
-| 2 | No pagination on list endpoints | DRF pagination (cursor-based for large portfolios) and server-side filtering |
-| 3 | Deleting a client cascades to assessments, evidence and reports (an underwriting audit trail), and orphans files on disk | Soft delete and archival; evidence cited by issued reports protected; retention policy per organization; file cleanup job |
-| 4 | No audit log | Who changed what and when (models and admin), immutable |
-| 5 | Files on local disk; no malware scanning (Nettle's security page promises it) | Object storage with signed URLs; ClamAV (or a provider) in the upload path |
-| 6 | No CI | GitHub Actions: tests against Postgres, `sync_config --check`, frontend type-check and build, dependency audit |
-| 7 | No observability | Structured logs with request and organization ids, error tracking, metrics for queue depth and age, AI latency and spend |
-| 8 | Evidence (possibly personal data) goes to an AI provider | Data processing agreement, zero data retention, per-organization opt-in, regional inference |
-| 9 | Django admin is cross-tenant (superuser, by design) | Organization-scoped admin or an internal tool, with an audit trail |
-| 10 | The dev database login role is a superuser | Unprivileged login role in production (required for RLS to bind) |
-| 11 | Login throttling uses per-process memory | Shared cache (Redis or database) |
-| 12 | Default Django `User` model | A custom user model, ideally from day one (switching later is painful) |
-| 13 | `NEXT_PUBLIC_API_URL` is baked in at build time | Same-origin API behind one domain, or runtime configuration |
-| 14 | `TemplateSection` rows (ids only) aren't RLS-protected | Add an `organization_id` for uniformity |
+| 1 | No pagination on list endpoints | DRF pagination (cursor-based for large portfolios) and server-side filtering |
+| 2 | Deleting a client cascades to assessments, evidence and reports (an underwriting audit trail), and orphans files on disk | Soft delete and archival; evidence cited by issued reports protected; retention policy per organization; file cleanup job |
+| 3 | No audit log beyond report review (who edited and issued) | Who changed what and when across models and admin, immutable |
+| 4 | Files on local disk; no malware scanning (Nettle's security page promises it) | Object storage with signed URLs; ClamAV (or a provider) in the upload path |
+| 5 | No observability | Structured logs with request and organization ids, error tracking, metrics for queue depth and age, AI latency and spend |
+| 6 | Evidence (possibly personal data) goes to an AI provider | Data processing agreement, zero data retention, per-organization opt-in, regional inference |
+| 7 | Django admin is cross-tenant (superuser, by design) | Organization-scoped admin or an internal tool, with an audit trail |
+| 8 | The dev database login role is a superuser | Unprivileged login role in production (required for RLS to bind) |
+| 9 | Login throttling uses per-process memory | Shared cache (Redis or database) |
+| 10 | Default Django `User` model | A custom user model, ideally from day one (switching later is painful) |
+| 11 | `NEXT_PUBLIC_API_URL` is baked in at build time | Same-origin API behind one domain, or runtime configuration |
+| 12 | `TemplateSection` rows (ids only) aren't RLS-protected | Add an `organization_id` for uniformity |
 
 ---
 
 ## What I'd do next
 
-1. Human review and approval of reports (the data model already keeps AI drafts).
-2. CI and production images.
-3. An evaluation set from real surveys, run on every prompt or template change.
-4. LISTEN/NOTIFY for instant job pickup and live progress.
-5. The two-stage evidence pipeline for large assessments.
-6. Regions and the migration path from per-customer deployments.
+1. An evaluation set from real surveys, run in CI on every prompt or template change.
+2. Pagination, soft delete with retention, and an audit log: the next production
+   gaps for real customer data.
+3. LISTEN/NOTIFY for instant job pickup and live progress.
+4. The two-stage evidence pipeline for large assessments.
+5. Regions and the migration path from per-customer deployments.
 
 ## How I used AI
 

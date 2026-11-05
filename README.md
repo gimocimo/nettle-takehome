@@ -59,7 +59,8 @@ The three organizations mirror the brief:
    worker`) tell you when it's ready.
 3. The report shows typed answers with citations to the evidence (quotes are
    verified against it), "insufficient evidence" where the AI couldn't answer,
-   and an **Evidence gaps** list of what to collect next.
+   and an **Evidence gaps** list of what to collect next. Edit an answer (the AI's
+   draft is kept), then **Approve and issue** to lock the report.
 4. `docker compose logs backend | grep Webhook` shows the signed `report.completed`
    webhook arriving at the demo receiver, with its signature verified.
 
@@ -69,9 +70,22 @@ The three organizations mirror the brief:
 docker compose run --rm backend pytest
 ```
 
-128 tests. They cover tenant isolation on every endpoint, row-level security
-directly in the database, the job queue, configuration sync, field validation and
-the generation pipeline (with a fake LLM, so no API calls).
+134 tests. They cover tenant isolation on every endpoint, row-level security
+directly in the database, the job queue, configuration sync, field validation, the
+generation pipeline (with a fake LLM, so no API calls) and report review. GitHub
+Actions runs them on every push, validates every customer's configuration and
+builds the frontend.
+
+## Production images
+
+`docker-compose.yaml` is for development. `docker-compose.prod.yaml` builds the
+production targets (gunicorn, the Next.js standalone server, non-root users), runs
+migrations as a one-off job before the app starts, and requires real secrets:
+
+```bash
+DJANGO_SECRET_KEY=... POSTGRES_PASSWORD=... ANTHROPIC_API_KEY=... \
+  docker compose -f docker-compose.prod.yaml up --build
+```
 
 ## Layout
 
