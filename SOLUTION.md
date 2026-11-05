@@ -8,7 +8,7 @@ explains what I built, why, what I deliberately left as a proposal, and what I f
 
 | Challenge | Status | In one line |
 |---|---|---|
-| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing; any section can be regenerated; engineers review, correct and issue the report. |
+| 1. Report structure | ✅ Built | A library of reusable, versioned sections; templates assembled from them per organization; the AI fills typed questions one section at a time, citing evidence with verified quotes, and says when evidence is missing; any section can be regenerated; engineers review, correct and issue the report, and export it as a PDF. |
 | 2. Customisable client fields | ✅ Built | A per-organization field registry: built-in columns plus JSON custom fields, renamed / relaxed / hidden / extended from a reviewed YAML file. No model change per customer. |
 | 3. Background generation | ✅ Built | A Postgres job queue behind Django 6's Tasks API; resumable section-by-section generation; in-app, desktop, email and webhook notifications. |
 | 4. Multi-tenancy | ✅ Core built, 📝 regions proposed | Organizations, memberships and roles; organization in the URL; one scoped base class for every endpoint; Postgres row-level security underneath; an isolation test suite. |
@@ -128,7 +128,9 @@ One structured-output call per section:
   citations but not add new ones (a "verified" quote must come from the server's
   check). **Approve and issue** locks the report and records who issued it and when.
   The report shows how many answers engineers edited: per report a review aid, and
-  across reports a measure of which questions the AI gets wrong.
+  across reports a measure of which questions the AI gets wrong. **Export PDF**
+  renders the branded report, marked DRAFT until it is issued; two real reports
+  are in [`docs/samples/`](docs/samples/).
 
 ### Repeatability and versioning
 
@@ -166,7 +168,7 @@ not the prose, is what makes reports comparable across sites.
   must not be the requester), per-section review states, and a dashboard of how
   often engineers change each question's AI draft, to find weak questions.
 - Natural-language template editing (proposed change → validated diff → preview),
-  conditional questions, pre-filling answers from client fields, PDF/DOCX export, and
+  conditional questions, pre-filling answers from client fields, DOCX export, and
   an evaluation set built from known surveys (e.g. the Udine PDF's five recommendations).
 
 ---
@@ -418,7 +420,7 @@ trail, per-tenant API rate limits, and per-tenant encryption keys.
 | 19 | Any failed fetch left pages on "Loading…" forever; failed reports were hidden | Error states everywhere; all report statuses shown (`5e13505`, `38a2594`) |
 | 20 | SSE client broke multi-byte characters and dropped events split across chunks | SSE removed; progress by polling (`38a2594`) |
 | 21 | UK clients' money shown in `$`; a value of 0 shown as "—"; report Markdown shown raw | Organization currency, correct empty check, structured rendering (`8630494`, `38a2594`) |
-| 22 | No tests and no CI | 142 tests, including tenant isolation and RLS; GitHub Actions runs them, validates every customer's config and builds the frontend (throughout, `a0a1d99`) |
+| 22 | No tests and no CI | 145 tests, including tenant isolation and RLS; GitHub Actions runs them, validates every customer's config and builds the frontend (throughout, `a0a1d99`) |
 | 23 | Containers ran the dev servers (`runserver`, `next dev`) as root, with `npm install` and a compiler in the image | Multi-stage images: gunicorn + WhiteNoise and the Next.js standalone server, non-root, `npm ci`; `docker-compose.prod.yaml` runs migrations as a one-off job before the app (`05c7ee5`) |
 | 24 | No human checkpoint between the AI's draft and the client | Engineers edit answers (AI draft kept), then approve and issue a locked report (`5e816f7`, `a29c145`) |
 | 25 | *Found in my own work by the first live run:* prompt caching never hit (the per-section output schema is part of the cached prefix) | One report-wide schema with server-side per-question checks: −45% cost per report, measured (`c48f83c`) |
@@ -469,7 +471,7 @@ What the output shows:
    (the Udine PDF's five numbered recommendations are a natural first case).
 2. From the original plan, not built yet: cancelling a running generation,
    pagination and filters, evidence thumbnails and deletion (refused while an issued
-   report cites the item), iPhone HEIC photos, report export to PDF/DOCX, and a
+   report cites the item), iPhone HEIC photos, report export to DOCX, and a
    development inbox (Mailpit) for notification emails.
 3. Soft delete with retention, and an audit log: the next production gaps for real
    customer data.

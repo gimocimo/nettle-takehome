@@ -61,7 +61,7 @@ The three organizations mirror the brief:
    verified against it), "insufficient evidence" where the AI couldn't answer,
    and an **Evidence gaps** list of what to collect next. Regenerate any section,
    edit an answer (the AI's draft is kept), then **Approve and issue** to lock the
-   report.
+   report. **Export PDF** works at any point (drafts are marked DRAFT).
 4. `docker compose logs backend | grep Webhook` shows the signed `report.completed`
    webhook arriving at the demo receiver, with its signature verified.
 
@@ -71,10 +71,10 @@ The three organizations mirror the brief:
 docker compose run --rm backend pytest
 ```
 
-142 tests. They cover tenant isolation on every endpoint, row-level security
+145 tests. They cover tenant isolation on every endpoint, row-level security
 directly in the database, the job queue, configuration sync, field validation, the
 generation pipeline (with a fake LLM, so no API calls), cost estimates, section
-regeneration and report review. GitHub
+regeneration, report review and PDF export. GitHub
 Actions runs them on every push, validates every customer's configuration and
 builds the frontend.
 
