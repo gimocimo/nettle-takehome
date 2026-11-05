@@ -1,11 +1,34 @@
 import os
 from pathlib import Path
 
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-takehome-exercise-key"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+
+# Everything environment-specific comes from env vars. docker-compose.yaml provides
+# development defaults; production must set them explicitly (fail fast if missing).
+DEBUG = env_bool("DJANGO_DEBUG", default=False)
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is off.")
+    SECRET_KEY = "dev-only-insecure-key"
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -38,7 +61,7 @@ ROOT_URLCONF = "nettle_core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -51,18 +74,19 @@ TEMPLATES = [
     },
 ]
 
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+if not DATABASE_URL:
+    if not DEBUG:
+        raise ImproperlyConfigured("DATABASE_URL must be set when DJANGO_DEBUG is off.")
+    DATABASE_URL = "postgres://nettle:nettle@localhost:5432/nettle"
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "nettle",
-        "USER": "nettle",
-        "PASSWORD": "nettle",
-        "HOST": os.environ.get("DB_HOST", "db"),
-        "PORT": "5432",
-    }
+    "default": dj_database_url.parse(DATABASE_URL, conn_max_age=60, conn_health_checks=True),
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+# Only the frontend origin may call the API from a browser.
+CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:3000")
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
@@ -70,10 +94,30 @@ REST_FRAMEWORK = {
     ],
 }
 
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+TIME_ZONE = "UTC"
+USE_TZ = True
+
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"plain": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "plain"}},
+    "root": {"handlers": ["console"], "level": os.environ.get("LOG_LEVEL", "INFO")},
+}
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")

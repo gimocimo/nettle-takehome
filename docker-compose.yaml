@@ -29,8 +29,14 @@ services:
       - ./sample_evidence:/app/sample_evidence:ro
       - media_data:/app/media
     environment:
+      # Development defaults. Production sets these from a secret store.
+      DJANGO_DEBUG: "1"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-insecure-key}
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
       DATABASE_URL: postgres://nettle:nettle@db:5432/nettle
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-sk-ant-placeholder}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      CSRF_TRUSTED_ORIGINS: http://localhost:3000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy
