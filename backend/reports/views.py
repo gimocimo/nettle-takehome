@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 import anthropic
 
+from nettle_core.params import uuid_query_param
+
 from .models import Report
 from .serializers import ReportSerializer, ReportListSerializer
 from evidence.models import Evidence
@@ -21,7 +23,7 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        assessment_id = self.request.query_params.get("assessment")
+        assessment_id = uuid_query_param(self.request, "assessment")
         if assessment_id:
             qs = qs.filter(assessment_id=assessment_id)
         return qs
