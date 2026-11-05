@@ -36,6 +36,22 @@ USERS = [
     ),
 ]
 
+# Personal reviewer logins: the same demo data, with a password shared privately
+# (only its hash is here). Development only, like the accounts above.
+REVIEWERS = [
+    # email, first name, password hash, {organization slug: role}
+    (
+        "katya@nettle.test",
+        "Katya",
+        "pbkdf2_sha256$1200000$HV9IKEfrQHZGreMqcjqsp6$P+GDpJ90KkSuO1oXHbszdsaWwgmInXJLuezL2miIruc=",
+        {
+            "default-insurer": Membership.ADMIN,
+            "customer-a": Membership.ADMIN,
+            "customer-b": Membership.ADMIN,
+        },
+    ),
+]
+
 
 class Command(BaseCommand):
     help = "Seed demo organizations, users and data (development only)"
@@ -57,6 +73,8 @@ class Command(BaseCommand):
         if len(orgs) != len(ORGANIZATIONS):
             raise CommandError("Run `manage.py sync_config` first: organizations are configuration.")
         if get_user_model().objects.filter(username=USERS[0][0]).exists():
+            # Idempotent, so reviewer logins also reach databases seeded before them.
+            self._seed_reviewers(orgs)
             self.stdout.write("Demo data already exists, skipping seed.")
             return
 
@@ -65,10 +83,23 @@ class Command(BaseCommand):
         # Runs without a tenant context: seeding is a privileged, cross-tenant operation.
         with transaction.atomic():
             self._seed_users(orgs)
+            self._seed_reviewers(orgs)
             self._seed_default_insurer(orgs["default-insurer"])
             self._seed_customer_a(orgs["customer-a"])
             self._seed_customer_b(orgs["customer-b"])
         self.stdout.write(self.style.SUCCESS("Seed data created successfully."))
+
+    def _seed_reviewers(self, orgs):
+        User = get_user_model()
+        for email, first_name, password_hash, roles in REVIEWERS:
+            user, created = User.objects.get_or_create(
+                username=email,
+                defaults={"email": email, "first_name": first_name, "password": password_hash},
+            )
+            for slug, role in roles.items():
+                Membership.objects.get_or_create(user=user, organization=orgs[slug], defaults={"role": role})
+            if created:
+                self.stdout.write(f"Reviewer login created: {email}")
 
     def _seed_users(self, orgs):
         User = get_user_model()
