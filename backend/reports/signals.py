@@ -3,6 +3,7 @@ from django.tasks.signals import task_finished
 from django.utils import timezone
 
 from notifications.service import notify
+from webhooks.events import emit, report_event_data
 from tenancy.db import tenant_transaction
 from tenancy.models import Organization
 
@@ -30,3 +31,4 @@ def finalize_failed_generation(sender, task_result, **kwargs):
             body=report.error_message,
             link=f"/o/{organization.slug}/reports/{report.id}",
         )
+        emit(organization, "report.failed", report_event_data(report))

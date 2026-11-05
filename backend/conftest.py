@@ -11,6 +11,8 @@ def _test_settings(settings, tmp_path):
     settings.MEDIA_ROOT = tmp_path / "media"
     # Fast password hashing: tests create many users.
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+    # Tests never make real network calls: webhooks to private hosts are refused.
+    settings.WEBHOOK_ALLOW_PRIVATE_HOSTS = False
 
 
 @pytest.fixture

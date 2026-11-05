@@ -5,6 +5,7 @@ the URL, so users who belong to several organizations (brokers, consultants,
 Nettle staff) can open them side by side and links are explicit.
 """
 from rest_framework import serializers, viewsets
+from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
@@ -12,8 +13,8 @@ from .db import activate_tenant
 from .models import Membership
 
 
-class OrganizationScopedViewSet(viewsets.ModelViewSet):
-    """Base class for every tenant endpoint.
+class OrganizationRequestMixin:
+    """Base behaviour for every tenant endpoint.
 
     1. The organization is taken from the URL.
     2. The user must be a member; otherwise 404, so other tenants' existence isn't revealed.
@@ -41,6 +42,12 @@ class OrganizationScopedViewSet(viewsets.ModelViewSet):
         request.membership = membership
         activate_tenant(membership.organization)
 
+
+class OrganizationScopedAPIView(OrganizationRequestMixin, APIView):
+    pass
+
+
+class OrganizationScopedViewSet(OrganizationRequestMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return super().get_queryset().filter(organization=self.request.organization)
 

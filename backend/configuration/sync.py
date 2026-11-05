@@ -10,6 +10,7 @@ from portfolio.models import Client, ClientFieldDefinition
 from reports.definitions import SectionSpec, content_hash
 from reports.models import ReportTemplate, SectionDefinition, TemplateSection
 from tenancy.models import Organization
+from webhooks.models import WebhookEndpoint
 
 from .schema import FieldOverride, OrganizationConfig
 
@@ -68,6 +69,7 @@ def apply_config(config: LoadedConfig) -> SyncReport:
     for org_config in config.organizations:
         organization = _upsert_organization(org_config, report)
         _sync_client_fields(organization, org_config.client_fields, report)
+        _sync_webhooks(organization, org_config.webhooks, report)
         own = {spec.key: _upsert_section(organization, spec, report) for spec in org_config.sections}
         available = {**shared, **own}
         active_keys = []
@@ -213,3 +215,19 @@ def _sync_client_fields(organization, config, report):
         if leftover.enabled:
             ClientFieldDefinition.objects.filter(pk=leftover.pk).update(enabled=False)
             report.changes.append(f"{organization.slug}: client field {leftover.key} disabled (values kept)")
+
+
+def _sync_webhooks(organization, webhooks, report):
+    existing = {endpoint.url: endpoint for endpoint in WebhookEndpoint.objects.filter(organization=organization)}
+    for config in webhooks:
+        endpoint = existing.pop(config.url, None)
+        if endpoint is None:
+            WebhookEndpoint.objects.create(organization=organization, url=config.url, events=config.events)
+            report.changes.append(f"{organization.slug}: webhook {config.url} added (secret generated)")
+        elif endpoint.events != config.events or not endpoint.is_active:
+            WebhookEndpoint.objects.filter(pk=endpoint.pk).update(events=config.events, is_active=True)
+            report.changes.append(f"{organization.slug}: webhook {config.url} updated")
+    for endpoint in existing.values():
+        if endpoint.is_active:
+            WebhookEndpoint.objects.filter(pk=endpoint.pk).update(is_active=False)
+            report.changes.append(f"{organization.slug}: webhook {endpoint.url} deactivated")

@@ -5,6 +5,8 @@ organization:
   name: Customer B
   language: en-GB
   currency: GBP
+  # Deliberately small, to see the budget warning quickly in a demo.
+  monthly_ai_budget_usd: 2
 
 # No insurance fields at all.
 client_fields:

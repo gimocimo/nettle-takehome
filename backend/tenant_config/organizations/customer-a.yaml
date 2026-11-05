@@ -4,6 +4,7 @@ organization:
   name: Customer A
   language: it-IT
   currency: EUR
+  monthly_ai_budget_usd: 20
 
 # The brief's "new customer": Industry is called Type, Sub-Industry is optional,
 # and there is a Regulatory Body field.

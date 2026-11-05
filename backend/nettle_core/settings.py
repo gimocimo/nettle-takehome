@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "ai",
     "jobs",
     "notifications",
+    "webhooks",
     "portfolio",
     "assessments",
     "evidence",
@@ -145,6 +146,12 @@ JOBS_MAX_RUNNING_PER_ORG = int(os.environ.get("JOBS_MAX_RUNNING_PER_ORG", "2"))
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Nettle <no-reply@nettle.test>")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# Webhook URLs must resolve to public addresses (SSRF), except in development
+# where the demo receiver runs inside the compose network.
+WEBHOOK_ALLOW_PRIVATE_HOSTS = env_bool("WEBHOOK_ALLOW_PRIVATE_HOSTS", default=DEBUG)
+# Share of the monthly AI budget at which organization admins are warned.
+AI_BUDGET_WARNING_RATIO = 0.8
 
 # Configuration as code: section library and per-organization configuration.
 TENANT_CONFIG_DIR = BASE_DIR / "tenant_config"

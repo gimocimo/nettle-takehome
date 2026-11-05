@@ -7,6 +7,7 @@ from tenancy.db import tenant_transaction
 from tenancy.models import Organization
 
 from notifications.service import notify
+from webhooks.events import emit, report_event_data
 
 from .generation import generate_report
 from .models import Report
@@ -46,3 +47,4 @@ def generate_report_task(context, *, organization_id, report_id):
             body="Your report has been generated and is ready for review.",
             link=f"/o/{organization.slug}/reports/{report.id}",
         )
+        emit(organization, "report.completed", report_event_data(report))

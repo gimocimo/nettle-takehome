@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from ai.budget import budget_status
 from nettle_core.params import uuid_query_param
 from tenancy.api import OrganizationScopedViewSet
 
@@ -44,6 +45,11 @@ class ReportViewSet(OrganizationScopedViewSet):
         template = serializer.validated_data["template"]
         assessment = serializer.validated_data["assessment"]
         organization = request.organization
+        if budget_status(organization)["status"] == "exceeded":
+            return Response(
+                {"detail": "This organization's monthly AI budget has been reached. An admin can raise it."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         try:
             with transaction.atomic():
                 report = Report.objects.create(

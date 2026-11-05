@@ -4,6 +4,13 @@ organization:
   name: Default Insurer
   language: en-GB
   currency: GBP
+  monthly_ai_budget_usd: 50
+
+# Demo receiver inside docker-compose (verifies signatures, logs events). A real
+# customer points this at their integration middleware.
+webhooks:
+  - url: http://backend:8000/api/dev/webhook-sink/
+    events: [report.completed, report.failed, budget.warning]
 
 report_templates:
   - key: standard-risk-report

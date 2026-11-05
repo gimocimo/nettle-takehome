@@ -16,6 +16,7 @@ from decimal import Decimal
 from django.db.models import DecimalField, F, Value
 from django.db.models.functions import Coalesce
 
+from ai.budget import warn_if_near_budget
 from ai.client import LLMError, get_client
 from ai.evidence import prepare_evidence, quote_is_verified
 from ai.models import AIUsage
@@ -106,6 +107,7 @@ def generate_report(report_id):
                 cost_usd=Coalesce("cost_usd", Value(Decimal(0)), output_field=DecimalField())
                 + (cost or Decimal(0)),
             )
+            warn_if_near_budget(organization)
 
 
 def _context_text(report):

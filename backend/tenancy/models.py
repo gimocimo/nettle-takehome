@@ -20,6 +20,8 @@ class Organization(models.Model):
     currency = models.CharField(max_length=3, default="GBP")
     # Blank: use the deployment default (settings.ANTHROPIC_MODEL).
     ai_model = models.CharField(max_length=64, blank=True, default="")
+    # Null: no limit. New reports are refused once the month's AI spend reaches it.
+    monthly_ai_budget_usd = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
