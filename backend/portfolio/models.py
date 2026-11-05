@@ -9,6 +9,10 @@ class Client(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # PROTECT: removing a tenant with data is an explicit offboarding job, never a cascade.
+    organization = models.ForeignKey(
+        "tenancy.Organization", on_delete=models.PROTECT, related_name="clients"
+    )
     name = models.CharField(max_length=255)
     
     # Contact details
@@ -71,6 +75,7 @@ class Client(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organization", "-created_at"], name="client_org_recent_idx")]
 
     def __str__(self):
         return self.name

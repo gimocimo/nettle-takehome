@@ -1,13 +1,35 @@
 """Small factories for tests. Plain functions keep tests readable without extra dependencies."""
+import itertools
 from datetime import date
+
+from django.contrib.auth import get_user_model
 
 from assessments.models import Assessment
 from evidence.models import Evidence
 from portfolio.models import Client
 from reports.models import Report
+from tenancy.models import Membership, Organization
+
+_sequence = itertools.count(1)
 
 
-def make_client(**overrides):
+def make_org(slug=None, **overrides):
+    slug = slug or f"org-{next(_sequence)}"
+    return Organization.objects.create(slug=slug, name=overrides.pop("name", slug.title()), **overrides)
+
+
+def make_user(email=None, password="test-password", **overrides):
+    email = email or f"user{next(_sequence)}@example.test"
+    return get_user_model().objects.create_user(username=email, email=email, password=password, **overrides)
+
+
+def make_member(organization, role=Membership.ENGINEER, user=None):
+    user = user or make_user()
+    Membership.objects.create(user=user, organization=organization, role=role)
+    return user
+
+
+def make_client(organization=None, **overrides):
     fields = {
         "name": "Acme Warehousing",
         "contact_name": "Jo Bloggs",
@@ -26,7 +48,7 @@ def make_client(**overrides):
         "coverage_type": "Commercial Property",
     }
     fields.update(overrides)
-    return Client.objects.create(**fields)
+    return Client.objects.create(organization=organization or make_org(), **fields)
 
 
 def make_assessment(client=None, **overrides):

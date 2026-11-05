@@ -17,6 +17,9 @@ class Report(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        "tenancy.Organization", on_delete=models.PROTECT, related_name="reports"
+    )
     assessment = models.ForeignKey(
         Assessment, on_delete=models.CASCADE, related_name="reports"
     )
@@ -28,6 +31,17 @@ class Report(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organization", "-created_at"], name="report_org_recent_idx")]
+
+    def save(self, *args, **kwargs):
+        # The organization is copied from the parent so every tenant table can be
+        # filtered (and protected by row-level security) without joins. It must match.
+        parent_org = self.assessment.organization_id
+        if self.organization_id is None:
+            self.organization_id = parent_org
+        elif self.organization_id != parent_org:
+            raise ValueError("Report and its assessment must belong to the same organization.")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Report: {self.title or self.assessment.title}"

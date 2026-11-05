@@ -8,6 +8,7 @@ from portfolio.models import Client
 from assessments.models import Assessment
 from evidence.models import Evidence
 from reports.models import Report
+from tenancy.models import Organization
 from datetime import date
 
 
@@ -38,8 +39,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Seed data created successfully."))
 
     def _seed(self):
+        organization, _ = Organization.objects.get_or_create(
+            slug="default", defaults={"name": "Default organization"}
+        )
+
         # Create clients
         client1 = Client.objects.create(
+            organization=organization,
             name="Hartfield Manufacturing Ltd",
             contact_name="James Whitaker",
             contact_email="j.whitaker@hartfield.co.uk",
@@ -66,6 +72,7 @@ class Command(BaseCommand):
         )
 
         client2 = Client.objects.create(
+            organization=organization,
             name="Pacific Coast Logistics",
             contact_name="Maria Chen",
             contact_email="m.chen@paccoast.com",
@@ -92,6 +99,7 @@ class Command(BaseCommand):
         )
 
         client3 = Client.objects.create(
+            organization=organization,
             name="Greenfield Retail Group",
             contact_name="Tom Bradley",
             contact_email="t.bradley@greenfield.com",
