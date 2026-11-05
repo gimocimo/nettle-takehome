@@ -6,6 +6,10 @@ organization:
   language: en-GB
   currency: GBP
 
+# No insurance fields at all.
+client_fields:
+  disabled_groups: [insurance]
+
 sections:
   - key: safety-summary
     title: Safety summary

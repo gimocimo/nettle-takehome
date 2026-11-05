@@ -6,8 +6,9 @@ organizations/<slug>.yaml  everything that differs between customers
 Customer configuration lives in Git: reviewed in pull requests, validated in CI
 (test_repository_config_is_valid), applied by `manage.py sync_config`.
 """
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from portfolio.fields import BUILTIN_KEYS, FIELD_TYPES, GROUP_KEYS
 from reports.definitions import SectionSpec
 
 
@@ -32,10 +33,71 @@ class TemplateConfig(BaseModel):
     sections: list[str] = Field(min_length=1)  # section keys, in display order
 
 
+class FieldOverride(BaseModel):
+    """Changes to one built-in client field; unset attributes keep the default."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str | None = None
+    required: bool | None = None
+    enabled: bool | None = None
+    help_text: str | None = None
+    show_in_list: bool | None = None
+
+
+class CustomField(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
+    label: str
+    type: str
+    group: str = "other"
+    required: bool = False
+    options: list[str] = []
+    help_text: str = ""
+    show_in_list: bool = False
+
+    @model_validator(mode="after")
+    def _valid(self):
+        if self.key in BUILTIN_KEYS:
+            raise ValueError(f"custom field '{self.key}' clashes with a built-in field")
+        if self.type not in FIELD_TYPES:
+            raise ValueError(f"custom field '{self.key}': unknown type '{self.type}' (use one of {FIELD_TYPES})")
+        if self.group not in GROUP_KEYS:
+            raise ValueError(f"custom field '{self.key}': unknown group '{self.group}'")
+        if (self.type == "choice") != bool(self.options):
+            raise ValueError(f"custom field '{self.key}': options are required for, and only for, choice fields")
+        return self
+
+
+class ClientFieldsConfig(BaseModel):
+    """How this organization's client form differs from the built-in defaults."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    overrides: dict[str, FieldOverride] = {}
+    disabled_groups: list[str] = []
+    custom: list[CustomField] = []
+
+    @model_validator(mode="after")
+    def _valid(self):
+        unknown = set(self.overrides) - BUILTIN_KEYS
+        if unknown:
+            raise ValueError(f"overrides for unknown built-in fields: {sorted(unknown)}")
+        bad_groups = set(self.disabled_groups) - set(GROUP_KEYS)
+        if bad_groups:
+            raise ValueError(f"unknown groups: {sorted(bad_groups)}")
+        keys = [field.key for field in self.custom]
+        if len(keys) != len(set(keys)):
+            raise ValueError("duplicate custom field keys")
+        return self
+
+
 class OrganizationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     organization: OrganizationSettings
+    client_fields: ClientFieldsConfig = ClientFieldsConfig()
     # Sections only this organization uses; a key here shadows the shared library.
     sections: list[SectionSpec] = []
     report_templates: list[TemplateConfig] = []

@@ -21,6 +21,7 @@ from ai.evidence import prepare_evidence, quote_is_verified
 from ai.models import AIUsage
 from ai.pricing import cost_usd
 from evidence.models import Evidence
+from portfolio.fields import client_context_lines
 from tenancy.db import tenant_transaction
 
 from .definitions import section_output_schema
@@ -109,12 +110,8 @@ def generate_report(report_id):
 
 def _context_text(report):
     assessment, client = report.assessment, report.assessment.client
-    fields = ["name", "industry", "sub_industry", "city", "country", "coverage_type", "notes"]
-    client_lines = [
-        f"{client._meta.get_field(name).verbose_name.capitalize()}: {getattr(client, name)}"
-        for name in fields
-        if getattr(client, name, None)
-    ]
+    # The organization's own fields and labels (e.g. "Type", "Regulatory Body").
+    client_lines = client_context_lines(client)
     assessment_lines = [
         f"Title: {assessment.title}",
         f"Site address: {assessment.site_address or 'not specified'}",

@@ -5,11 +5,13 @@ import yaml
 from django.db import transaction
 from pydantic import ValidationError
 
+from portfolio.fields import BUILTIN_FIELDS
+from portfolio.models import Client, ClientFieldDefinition
 from reports.definitions import SectionSpec, content_hash
 from reports.models import ReportTemplate, SectionDefinition, TemplateSection
 from tenancy.models import Organization
 
-from .schema import OrganizationConfig
+from .schema import FieldOverride, OrganizationConfig
 
 
 class ConfigError(Exception):
@@ -65,6 +67,7 @@ def apply_config(config: LoadedConfig) -> SyncReport:
     shared = {spec.key: _upsert_section(None, spec, report) for spec in config.library}
     for org_config in config.organizations:
         organization = _upsert_organization(org_config, report)
+        _sync_client_fields(organization, org_config.client_fields, report)
         own = {spec.key: _upsert_section(organization, spec, report) for spec in org_config.sections}
         available = {**shared, **own}
         active_keys = []
@@ -148,3 +151,65 @@ def _upsert_template(organization, template_config, sections, report):
     )
     report.changes.append(f"{organization.slug}: template {template.key} v{template.version}")
     return template
+
+
+def _desired_client_fields(config):
+    for position, (key, label, field_type, group, required, show_in_list, choices) in enumerate(BUILTIN_FIELDS):
+        override = config.overrides.get(key, FieldOverride())
+        yield {
+            "key": key,
+            "storage": "column",
+            "field_type": field_type,
+            "group": group,
+            "position": position,
+            "label": override.label or label,
+            "required": required if override.required is None else override.required,
+            "enabled": (group not in config.disabled_groups) if override.enabled is None else override.enabled,
+            "choices": choices,
+            "help_text": override.help_text or "",
+            "show_in_list": show_in_list if override.show_in_list is None else override.show_in_list,
+        }
+    for position, custom in enumerate(config.custom, start=len(BUILTIN_FIELDS)):
+        yield {
+            "key": custom.key,
+            "storage": "custom",
+            "field_type": custom.type,
+            "group": custom.group,
+            "position": position,
+            "label": custom.label,
+            "required": custom.required,
+            "enabled": True,
+            "choices": custom.options,
+            "help_text": custom.help_text,
+            "show_in_list": custom.show_in_list,
+        }
+
+
+def _sync_client_fields(organization, config, report):
+    """Field keys never change. A custom field removed from config is disabled, not
+    deleted (its values stay in the data). Changing a custom field's type when
+    values exist is refused: that needs an explicit data migration."""
+    existing = {d.key: d for d in ClientFieldDefinition.objects.filter(organization=organization)}
+    for values in _desired_client_fields(config):
+        current = existing.pop(values["key"], None)
+        if current is None:
+            ClientFieldDefinition.objects.create(organization=organization, **values)
+            report.changes.append(f"{organization.slug}: client field {values['key']} added")
+            continue
+        if (
+            current.storage == "custom"
+            and current.field_type != values["field_type"]
+            and Client.objects.filter(organization=organization, custom_fields__has_key=values["key"]).exists()
+        ):
+            raise ConfigError(
+                f"{organization.slug}: changing the type of '{values['key']}' would invalidate stored "
+                "values; migrate them explicitly first"
+            )
+        changed = {name: value for name, value in values.items() if getattr(current, name) != value}
+        if changed:
+            ClientFieldDefinition.objects.filter(pk=current.pk).update(**changed)
+            report.changes.append(f"{organization.slug}: client field {values['key']} changed ({', '.join(changed)})")
+    for leftover in existing.values():
+        if leftover.enabled:
+            ClientFieldDefinition.objects.filter(pk=leftover.pk).update(enabled=False)
+            report.changes.append(f"{organization.slug}: client field {leftover.key} disabled (values kept)")

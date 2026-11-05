@@ -5,6 +5,19 @@ organization:
   language: it-IT
   currency: EUR
 
+# The brief's "new customer": Industry is called Type, Sub-Industry is optional,
+# and there is a Regulatory Body field.
+client_fields:
+  overrides:
+    industry: {label: Type}
+    sub_industry: {required: false}
+  custom:
+    - key: regulatory_body
+      label: Regulatory Body
+      type: text
+      group: company
+      show_in_list: true
+
 report_templates:
   - key: property-cope-survey
     name: Property survey (COPE)

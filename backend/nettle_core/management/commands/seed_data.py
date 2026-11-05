@@ -220,6 +220,7 @@ class Command(BaseCommand):
             postal_code="33100",
             country="Italy",
             coverage_type="Property",
+            custom_fields={"regulatory_body": "ARPA FVG (regional environmental agency)"},
         )
         assessment = Assessment.objects.create(
             title="Hazardous goods warehouse survey - Udine",
@@ -256,7 +257,6 @@ class Command(BaseCommand):
             state_province="West Yorkshire",
             postal_code="LS10 1AA",
             country="United Kingdom",
-            coverage_type="Self-insured",
         )
         assessment = Assessment.objects.create(
             title="Forklift charging and storage safety review",
