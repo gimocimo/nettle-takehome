@@ -5,6 +5,7 @@ organization:
   language: en-GB
   currency: GBP
   monthly_ai_budget_usd: 50
+  ai_models: [claude-sonnet-5-5, claude-haiku-5-5]
 
 # Demo receiver inside docker-compose (verifies signatures, logs events). A real
 # customer points this at their integration middleware.

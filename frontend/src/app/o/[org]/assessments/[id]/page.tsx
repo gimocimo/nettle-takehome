@@ -38,6 +38,20 @@ interface Budget {
   status: "unlimited" | "ok" | "warning" | "exceeded";
 }
 
+interface ModelEstimate {
+  model: string;
+  label: string;
+  is_default: boolean;
+  cost_usd: string | null;
+  basis: string;
+}
+
+function formatCost(cost: string | null) {
+  if (cost === null) return "cost unknown";
+  const value = Number(cost);
+  return value < 0.01 ? "< $0.01" : `$${value.toFixed(2)}`;
+}
+
 interface Template {
   id: string;
   key: string;
@@ -57,6 +71,8 @@ export default function AssessmentDetailPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templateId, setTemplateId] = useState("");
   const [budget, setBudget] = useState<Budget | null>(null);
+  const [estimates, setEstimates] = useState<ModelEstimate[]>([]);
+  const [model, setModel] = useState("");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
 
@@ -81,6 +97,21 @@ export default function AssessmentDetailPage() {
       if (list.length > 0) setTemplateId(list[0].id);
     });
   }, [org, id, loadEvidence, loadReports]);
+
+  // Estimated cost per allowed model, from this assessment's evidence and the
+  // organization's past usage; refreshed when the template or the evidence changes.
+  useEffect(() => {
+    if (!templateId) return;
+    apiFetch(orgPath(org, `reports/estimate/?assessment=${id}&template=${templateId}`))
+      .then((data) => {
+        const models = data.models as ModelEstimate[];
+        setEstimates(models);
+        setModel((current) =>
+          models.some((m) => m.model === current) ? current : models.find((m) => m.is_default)?.model ?? ""
+        );
+      })
+      .catch(() => setEstimates([]));
+  }, [org, id, templateId, evidence.length]);
 
   // Generation runs on the server: this page only follows progress while it's open.
   const anyActive = reports.some((r) => ACTIVE_STATUSES.includes(r.status));
@@ -126,7 +157,7 @@ export default function AssessmentDetailPage() {
       Notification.requestPermission();
     }
     try {
-      await apiPost(orgPath(org, "reports/"), { assessment: id, template: templateId });
+      await apiPost(orgPath(org, "reports/"), { assessment: id, template: templateId, ai_model: model });
       await loadReports();
       apiFetch(orgPath(org, "ai-budget/")).then(setBudget);
     } catch (err) {
@@ -218,6 +249,27 @@ export default function AssessmentDetailPage() {
                 </button>
               </div>
               {selected && <p className="text-xs text-gray-500">Sections: {selected.sections.join(" · ")}</p>}
+              {estimates.length > 0 && (
+                <div className="space-y-1">
+                  <select
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                    aria-label="AI model"
+                  >
+                    {estimates.map((m) => (
+                      <option key={m.model} value={m.model}>
+                        {m.label} · est. {formatCost(m.cost_usd)}
+                        {m.is_default ? " (default)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500">
+                    Estimated from this assessment&apos;s evidence;{" "}
+                    {estimates.find((m) => m.model === model)?.basis ?? "default assumptions"} for the output.
+                  </p>
+                </div>
+              )}
               {budget && (budget.status === "warning" || budget.status === "exceeded") && (
                 <p
                   className={`text-xs rounded px-2 py-1 ${

@@ -7,6 +7,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from ai.budget import budget_status
+from ai.estimate import estimate_report_costs
+from assessments.models import Assessment
+from evidence.models import Evidence
 from nettle_core.params import uuid_query_param
 from tenancy.api import OrganizationScopedViewSet
 
@@ -63,7 +66,7 @@ class ReportViewSet(OrganizationScopedViewSet):
                     title=f"{template.name} - {assessment.client.name}",
                     status="queued",
                     language=template.language,
-                    ai_model=organization.effective_ai_model,
+                    ai_model=serializer.validated_data.get("ai_model") or organization.effective_ai_model,
                     requested_by=request.user,
                     progress_total=len(template.ordered_sections()),
                 )
@@ -75,6 +78,20 @@ class ReportViewSet(OrganizationScopedViewSet):
         # Same transaction as the report (ATOMIC_REQUESTS): both commit or neither does.
         generate_report_task.enqueue(organization_id=str(organization.id), report_id=str(report.id))
         return Response(ReportSerializer(report, context=self.get_serializer_context()).data, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=["get"])
+    def estimate(self, request, **kwargs):
+        """Estimated cost per allowed model, before generating: ?assessment=&template="""
+        assessment_id = uuid_query_param(request, "assessment")
+        template_id = uuid_query_param(request, "template")
+        if not assessment_id or not template_id:
+            raise ValidationError("assessment and template are required.")
+        assessment = get_object_or_404(Assessment.objects.filter(organization=request.organization), pk=assessment_id)
+        template = get_object_or_404(
+            ReportTemplate.objects.filter(organization=request.organization, is_active=True), pk=template_id
+        )
+        evidence = Evidence.objects.filter(assessment=assessment)
+        return Response(estimate_report_costs(request.organization, template, evidence))
 
     @action(detail=True, methods=["post"])
     def retry(self, request, pk=None, **kwargs):

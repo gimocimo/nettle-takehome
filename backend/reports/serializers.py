@@ -90,10 +90,17 @@ class ReportCreateSerializer(OrganizationScopedSerializer):
     """Starting a generation: pick an assessment and one of the organization's templates."""
 
     template = serializers.PrimaryKeyRelatedField(queryset=ReportTemplate.objects.filter(is_active=True))
+    ai_model = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Report
-        fields = ["id", "assessment", "template"]
+        fields = ["id", "assessment", "template", "ai_model"]
+
+    def validate_ai_model(self, value):
+        allowed = self.context["organization"].allowed_ai_models
+        if value and value not in allowed:
+            raise serializers.ValidationError(f"Choose one of this organization's models: {', '.join(allowed)}.")
+        return value
 
     def validate(self, attrs):
         assessment = attrs["assessment"]

@@ -23,7 +23,21 @@ class OrganizationSettings(BaseModel):
     language: str = "en-GB"
     currency: str = Field(default="GBP", pattern=r"^[A-Z]{3}$")
     ai_model: str = ""  # blank: the deployment default
+    ai_models: list[str] = []  # other models engineers may choose per report
     monthly_ai_budget_usd: Decimal | None = Field(default=None, ge=0)  # None: no limit
+
+    @model_validator(mode="after")
+    def _known_models(self):
+        return _check_models(self)
+
+
+def _check_models(settings):
+    from ai.pricing import PRICES
+
+    unknown = [m for m in [settings.ai_model, *settings.ai_models] if m and m not in PRICES]
+    if unknown:
+        raise ValueError(f"unknown AI models {unknown} (known: {sorted(PRICES)})")
+    return settings
 
 
 class TemplateConfig(BaseModel):

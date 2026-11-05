@@ -20,6 +20,8 @@ class Organization(models.Model):
     currency = models.CharField(max_length=3, default="GBP")
     # Blank: use the deployment default (settings.ANTHROPIC_MODEL).
     ai_model = models.CharField(max_length=64, blank=True, default="")
+    # Other models engineers may choose per report (with a cost estimate for each).
+    ai_models = models.JSONField(default=list, blank=True)
     # Null: no limit. New reports are refused once the month's AI spend reaches it.
     monthly_ai_budget_usd = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -35,6 +37,12 @@ class Organization(models.Model):
         from django.conf import settings
 
         return self.ai_model or settings.ANTHROPIC_MODEL
+
+    @property
+    def allowed_ai_models(self):
+        """The default model first, then the other models engineers may choose."""
+        default = self.effective_ai_model
+        return [default] + [model for model in self.ai_models if model != default]
 
 
 class Membership(models.Model):

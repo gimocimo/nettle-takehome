@@ -14,6 +14,13 @@ PRICES = {
     "claude-sonnet-5": (Decimal("2"), Decimal("10"), Decimal("0.20")),
     "claude-haiku-5-5": (Decimal("0.10"), Decimal("0.50"), Decimal("0.01")),
 }
+MODEL_LABELS = {
+    "claude-opus-5-5": "Claude Opus 5.5",
+    "claude-opus-5": "Claude Opus 5",
+    "claude-sonnet-5-5": "Claude Sonnet 5.5",
+    "claude-sonnet-5": "Claude Sonnet 5",
+    "claude-haiku-5-5": "Claude Haiku 5.5",
+}
 CACHE_WRITE_MULTIPLIER = Decimal("1.25")
 MILLION = Decimal(1_000_000)
 

@@ -5,6 +5,7 @@ organization:
   language: it-IT
   currency: EUR
   monthly_ai_budget_usd: 20
+  ai_models: [claude-sonnet-5-5]
 
 # The brief's "new customer": Industry is called Type, Sub-Industry is optional,
 # and there is a Regulatory Body field.

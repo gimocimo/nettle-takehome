@@ -7,6 +7,9 @@ organization:
   currency: GBP
   # Deliberately small, to see the budget warning quickly in a demo.
   monthly_ai_budget_usd: 2
+  # Cheaper default model for a small budget.
+  ai_model: claude-sonnet-5-5
+  ai_models: [claude-haiku-5-5]
 
 # No insurance fields at all.
 client_fields:
