@@ -8,6 +8,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
+from .db import activate_tenant
 from .models import Membership
 
 
@@ -18,6 +19,8 @@ class OrganizationScopedViewSet(viewsets.ModelViewSet):
     2. The user must be a member; otherwise 404, so other tenants' existence isn't revealed.
     3. Writes require one of `write_roles` (viewers are read-only).
     4. Every query is filtered to the organization; every create is stamped with it.
+    5. The request's transaction is scoped to the organization in Postgres too
+       (row-level security), so a forgotten filter still can't leak rows.
     """
 
     permission_classes = [IsAuthenticated]
@@ -36,6 +39,7 @@ class OrganizationScopedViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("Your role in this organization is read-only.")
         request.organization = membership.organization
         request.membership = membership
+        activate_tenant(membership.organization)
 
     def get_queryset(self):
         return super().get_queryset().filter(organization=self.request.organization)
