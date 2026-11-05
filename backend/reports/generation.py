@@ -3,8 +3,8 @@
 Why per section: small output schemas the model fills reliably, per-section
 retries and progress, and the option to regenerate one section later. Every call
 starts with the same prefix (system prompt, client and assessment context, all
-evidence), marked for prompt caching, so sections 2..N read the evidence from
-cache at a fraction of the input price. Synthesis sections (executive summary,
+evidence) and uses the same report-wide output schema, so sections 2..N read the
+prefix from cache at a fraction of the input price. Synthesis sections (executive summary,
 overall rating) run last and see the other sections' answers.
 
 Answers are saved after each section in a short tenant-scoped transaction (never
@@ -25,7 +25,7 @@ from evidence.models import Evidence
 from portfolio.fields import client_context_lines
 from tenancy.db import tenant_transaction
 
-from .definitions import section_output_schema
+from .definitions import answer_key, coerce_answer, question_brief, report_output_schema
 from .models import Report, ReportAnswer
 
 LANGUAGE_NAMES = {
@@ -75,6 +75,8 @@ def generate_report(report_id):
     language = LANGUAGE_NAMES.get(report.language, report.language or "English")
     system = SYSTEM_PROMPT.format(language=language)
     prefix = _cached_prefix(context_text, prepared)
+    specs = [section.spec for section in sections]
+    schema = report_output_schema([answer_key(spec.key, q.key) for spec in specs for q in spec.questions])
     client = get_client()
 
     ordered = [s for s in sections if not s.spec.synthesis] + [s for s in sections if s.spec.synthesis]
@@ -90,11 +92,12 @@ def generate_report(report_id):
             model=report.ai_model,
             system=system,
             content=[*prefix, {"type": "text", "text": _section_instruction(spec, previous)}],
-            schema=section_output_schema(spec),
+            schema=schema,
         )
+        answers = _answers(report, spec, result.data, by_label)  # validated before saving
 
         with tenant_transaction(organization):
-            ReportAnswer.objects.bulk_create(_answers(report, spec, result.data, by_label))
+            ReportAnswer.objects.bulk_create(answers)
             cost = cost_usd(result.model, **result.usage)
             AIUsage.objects.create(
                 organization=organization,
@@ -148,12 +151,12 @@ def _section_instruction(spec, previous):
     lines = [f'Write the section "{spec.title}" of the report.']
     if spec.guidance:
         lines.append(spec.guidance.strip())
-    lines.append("Answer each question (the JSON keys of your answer are the question keys):")
-    for question in spec.questions:
-        detail = f" Options: {', '.join(question.options)}." if question.options else ""
-        unit = f" Unit: {question.unit}." if question.unit else ""
-        hint = f" {question.guidance}" if question.guidance else ""
-        lines.append(f"- {question.key}: {question.prompt}{detail}{unit}{hint}")
+    lines.append(
+        "Answer exactly these questions: one entry in \"answers\" per question_key, with the value in "
+        "the field named by answer_in (leave the other value fields empty); for questions with options, "
+        "the text must be one of the options:"
+    )
+    lines.append(json.dumps([question_brief(spec, q) for q in spec.questions], ensure_ascii=False))
     if previous is not None:
         lines.append(
             "Base this section on the other sections' answers below (cite the evidence ids "
@@ -195,10 +198,16 @@ def _citations(raw_citations, by_label):
 
 
 def _answers(report, spec, data, by_label):
+    given = {entry["question_key"]: entry for entry in data["answers"]}
     answers = []
     for question in spec.questions:
-        raw = data[question.key]
-        value = raw["value"]
+        raw = given.get(answer_key(spec.key, question.key))
+        if raw is None:
+            raise LLMError(f"The AI skipped the question '{question.key}'; retrying.", transient=True)
+        try:
+            value = coerce_answer(question, raw)
+        except ValueError as exc:
+            raise LLMError(f"The AI's answer to '{question.key}' was invalid ({exc}); retrying.", transient=True)
         if question.type == "recommendations":
             value = [{**item, "citations": _citations(item["citations"], by_label)} for item in value]
         answers.append(

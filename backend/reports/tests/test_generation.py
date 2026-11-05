@@ -46,10 +46,17 @@ def test_synthesis_sections_run_last_and_see_the_other_answers(report, fake_llm)
 
 
 def test_every_call_shares_one_cacheable_prefix(report, fake_llm):
+    """Output schema, system prompt and evidence are all part of the cached prefix:
+    they must be byte-identical across the sections of a report (measured against the
+    API: a different schema per section meant zero cache hits). Only the final
+    instruction varies."""
     generate_report(report.id)
-    prefixes = [call["content"][:-1] for call in fake_llm.calls]
-    assert all(prefix == prefixes[0] for prefix in prefixes)  # byte-identical => cache hits
-    assert prefixes[0][-1]["cache_control"] == {"type": "ephemeral"}
+    first = fake_llm.calls[0]
+    for call in fake_llm.calls:
+        assert call["schema"] == first["schema"]
+        assert call["system"] == first["system"]
+        assert call["content"][:-1] == first["content"][:-1]
+    assert first["content"][-2]["cache_control"] == {"type": "ephemeral"}
 
 
 def test_citations_are_mapped_to_evidence_and_quotes_verified(report, fake_llm):
@@ -102,3 +109,26 @@ def test_an_assessment_without_readable_evidence_is_refused(report, fake_llm):
     report.assessment.evidence.all().delete()
     with pytest.raises(GenerationError):
         generate_report(report.id)
+
+
+class _OffOptions(FakeLLM):
+    def _answer(self, question):
+        entry = super()._answer(question)
+        if "options" in question:
+            entry["text"] = "Somewhat fine"  # not one of the options
+        return entry
+
+
+def test_answers_that_break_the_questions_rules_are_retried_not_saved(report, monkeypatch):
+    monkeypatch.setattr("reports.generation.get_client", lambda: _OffOptions())
+    with pytest.raises(LLMError) as error:
+        generate_report(report.id)
+    assert error.value.transient
+    assert not ReportAnswer.objects.filter(report=report, section_key="executive-summary").exists()
+
+
+def test_choice_answers_are_matched_case_insensitively():
+    from reports.definitions import Question, coerce_answer
+
+    rating = Question(key="r", prompt="Rating", type="rating", options=["Low", "High"])
+    assert coerce_answer(rating, {"status": "answered", "text": " high "}) == "High"

@@ -49,7 +49,9 @@ class AnthropicClient:
         )
 
     def generate_json(self, *, model, system, content, schema, max_tokens=16000):
-        """One structured-output call: the response is guaranteed to match `schema`."""
+        """One structured-output call: the response is guaranteed to match `schema`.
+        Callers keep `schema` identical across related calls: it is part of the
+        cached prompt prefix."""
         try:
             response = self._client.messages.create(
                 model=model,
