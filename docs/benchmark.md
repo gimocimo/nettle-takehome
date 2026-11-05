@@ -2,7 +2,8 @@
 
 *Bonus work, after the timebox. Run on 5 November 2026 with
 `manage.py benchmark_models`. The raw results, including the judge's reasoning, are in
-[benchmark-results.json](benchmark-results.json).*
+[benchmark-results.json](benchmark-results.json), and there is a
+[one-page PDF summary](benchmark-summary.pdf).*
 
 I generated the same two assessments with Claude Opus 5.5 (the default), Sonnet 5.5
 and Haiku 5.5, twice each. Every run went through the normal queue and worker, with
@@ -90,6 +91,9 @@ The 12 reports and 6 judge calls cost $2.23 in total, and all 12 runs completed.
   by hand, not every difference. The systematic fix is a second check that the quoted
   evidence supports each rated or classified answer, plus spot checks by engineers.
 - A second run can read the first run's prompt cache, so costs vary between runs.
+- Every run used effort `medium`. That is the default for Opus 5.5 and Haiku 5.5, but
+  one level below Sonnet 5.5's default (`high`, on a recalibrated scale), so Sonnet may
+  be understated. A targeted effort sweep is the natural next run.
 
 ## Reproduce it
 
