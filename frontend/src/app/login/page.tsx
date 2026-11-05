@@ -28,12 +28,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-[#fefbf7]">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/nettle-wordmark.jpg" alt="nettle" className="w-full max-w-xl mb-3" />
+      <p className="text-sm text-gray-600 mb-8">The AI workspace for loss control</p>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 space-y-4"
+        className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 space-y-4 shadow-sm"
       >
-        <h1 className="text-xl font-bold">Sign in to Nettle</h1>
+        <h1 className="text-xl font-bold">Sign in</h1>
         <div>
           <label className="block text-sm font-medium mb-1">Email</label>
           <input
@@ -60,7 +63,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700 disabled:opacity-50"
+          className="w-full bg-brand text-white px-4 py-2 rounded text-sm hover:bg-brand-dark disabled:opacity-50"
         >
           {submitting ? "Signing in..." : "Sign in"}
         </button>

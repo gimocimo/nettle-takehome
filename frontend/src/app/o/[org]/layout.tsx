@@ -37,8 +37,10 @@ export default function OrganizationLayout({ children }: { children: React.React
     <>
       <nav className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-8">
-          <Link href={`/o/${org}`} className="font-bold text-lg">
-            Nettle
+          <Link href={`/o/${org}`} className="flex items-center gap-2 text-xl font-bold tracking-tight">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/nettle-mark.png" alt="" width={26} height={26} />
+            nettle
           </Link>
           {me.memberships.length > 1 ? (
             <select

@@ -2,7 +2,7 @@ import "./globals.css";
 import { SessionProvider } from "@/lib/session";
 
 export const metadata = {
-  title: "Nettle Basic",
+  title: "Nettle",
   description: "Risk engineering platform",
 };
 
@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900 min-h-screen">
+      <body className="bg-cream-light text-gray-900 min-h-screen">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

@@ -28,7 +28,7 @@ export default function PortfolioPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Portfolio</h1>
         {canWrite && (
-          <Link href={`/o/${org}/portfolio/new`} className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700">
+          <Link href={`/o/${org}/portfolio/new`} className="bg-brand text-white px-4 py-2 rounded text-sm hover:bg-brand-dark">
             Add Client
           </Link>
         )}

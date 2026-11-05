@@ -103,7 +103,7 @@ export function AnswerEditor({
       {input}
       {error && <p className="text-xs text-red-600">{error}</p>}
       <div className="flex gap-2">
-        <button onClick={save} disabled={saving} className="text-sm px-3 py-1 bg-gray-900 text-white rounded hover:bg-gray-700 disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="text-sm px-3 py-1 bg-brand text-white rounded hover:bg-brand-dark disabled:opacity-50">
           {saving ? "Saving..." : "Save"}
         </button>
         <button onClick={onCancel} className="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">

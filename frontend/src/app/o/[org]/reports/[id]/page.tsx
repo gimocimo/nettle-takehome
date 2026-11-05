@@ -201,7 +201,7 @@ export default function ReportDetailPage() {
                 await apiPost(orgPath(org, `reports/${report.id}/retry/`), {});
                 load();
               }}
-              className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded hover:bg-gray-700 shrink-0"
+              className="text-sm px-3 py-1.5 bg-brand text-white rounded hover:bg-brand-dark shrink-0"
             >
               Retry (resumes)
             </button>

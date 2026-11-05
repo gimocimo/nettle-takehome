@@ -116,7 +116,7 @@ export function ClientForm({ org, client, onSaved }: { org: string; client?: Cli
         </section>
       ))}
       {formError && <p className="text-sm text-red-600">{formError}</p>}
-      <button type="submit" disabled={saving} className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700 disabled:opacity-50">
+      <button type="submit" disabled={saving} className="bg-brand text-white px-4 py-2 rounded text-sm hover:bg-brand-dark disabled:opacity-50">
         {saving ? "Saving..." : client ? "Save changes" : "Create client"}
       </button>
     </form>

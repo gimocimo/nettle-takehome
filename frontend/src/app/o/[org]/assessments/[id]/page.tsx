@@ -243,7 +243,7 @@ export default function AssessmentDetailPage() {
                 <button
                   onClick={handleGenerate}
                   disabled={starting || !templateId || evidence.length === 0 || budget?.status === "exceeded"}
-                  className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-sm px-3 py-1.5 bg-brand text-white rounded hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {starting ? "Starting..." : "Generate report"}
                 </button>

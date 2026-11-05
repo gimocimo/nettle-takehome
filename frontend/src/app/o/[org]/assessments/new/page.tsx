@@ -110,7 +110,7 @@ export default function NewAssessmentPage() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
-          className="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"
+          className="bg-brand text-white px-4 py-2 rounded text-sm hover:bg-brand-dark"
         >
           Create Assessment
         </button>
