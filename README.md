@@ -8,6 +8,35 @@ language, AI model and budget.
 
 **For the take-home write-up see [SOLUTION.md](SOLUTION.md).**
 
+## Screenshots
+
+**Generation runs in the background.** Pick a template and a model, each with its
+estimated cost for this assessment's evidence. Progress updates live, and you can
+leave the page.
+
+![Assessment page: evidence on the left; template and model picker with cost estimate, and a report generating section 4 of 7, on the right](docs/screenshots/1-generate-in-background.png)
+
+**Typed answers that cite the evidence.** Each answer cites the evidence it relies
+on, and quotes are checked against that evidence (✓). Where the evidence can't
+answer, the report says so and names what would. Sections can be regenerated and
+answers edited before an engineer issues the report.
+
+![Report: a High occupancy classification with verified quotes, an "insufficient evidence" answer naming the drawings needed, and a cited narrative answer](docs/screenshots/2-report-citations-and-gaps.png)
+
+**Configured per customer.** Customer A's surveys are written in Italian. The quotes
+stay verbatim from the English source PDF and are verified against it.
+
+![Italian report: recommendations with priority, observation, action and verified quotes](docs/screenshots/3-italian-report-recommendations.png)
+
+**Customer A's own client fields, and notifications.** "Industry" is called "Type",
+"Regulatory Body" is a custom field, and amounts use the organization's currency and
+locale. The bell links to the finished report.
+
+![Client page in Customer A with Type and Regulatory Body fields, and the notification menu showing a finished report](docs/screenshots/4-customer-fields-and-notification.png)
+
+Two real generated reports, exported as PDF: [Pacific Coast (English)](docs/samples/sample-report-pacific-coast-cope.pdf)
+and [Udine (Italian)](docs/samples/sample-report-udine-cope-italian.pdf).
+
 ## Run it
 
 ```bash
