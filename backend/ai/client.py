@@ -13,6 +13,10 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+# Worth retrying later (besides every 5xx, including 529 "overloaded"): request
+# timeout, conflict, rate limit. The same set the SDK's own quick retries use.
+TRANSIENT_STATUS_CODES = {408, 409, 429}
+
 
 # PROPOSED (not built): a provider interface (Anthropic / OpenAI / Google, as Nettle
 # offers) chosen per organization, and regional routing for data residency: the
@@ -63,9 +67,13 @@ class AnthropicClient:
                     "format": {"type": "json_schema", "schema": schema},
                 },
             )
-        except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError) as exc:
+        except anthropic.APIConnectionError as exc:  # timeouts included
             raise LLMError(f"AI provider temporarily unavailable ({type(exc).__name__}).", transient=True) from exc
         except anthropic.APIStatusError as exc:
+            # By status code, not exception class: the SDK raises 529 "overloaded" as
+            # OverloadedError, a direct APIStatusError subclass, not an InternalServerError.
+            if exc.status_code in TRANSIENT_STATUS_CODES or exc.status_code >= 500:
+                raise LLMError(f"AI provider temporarily unavailable ({type(exc).__name__}).", transient=True) from exc
             logger.warning("AI request rejected: %s", exc)
             raise LLMError(f"AI request rejected ({exc.status_code}).", transient=False) from exc
 
