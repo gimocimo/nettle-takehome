@@ -22,6 +22,9 @@ export interface Answer {
   citations: Citation[];
   missing_evidence: string;
   edited: boolean;
+  edited_by: string | null;
+  edited_at: string | null;
+  ai_value: string | number | Recommendation[] | null;
 }
 
 export interface Question {
@@ -46,11 +49,12 @@ export interface ReportSummary {
   assessment_title: string;
   template: { key: string; name: string; version: number; language: string } | null;
   title: string;
-  status: "pending" | "queued" | "generating" | "completed" | "failed" | "cancelled";
+  status: "pending" | "queued" | "generating" | "completed" | "failed" | "cancelled" | "issued";
   progress_completed: number;
   progress_total: number;
   current_section: string;
   error_message: string;
+  issued_at: string | null;
   created_at: string;
 }
 
@@ -69,6 +73,8 @@ export interface Report extends ReportSummary {
     cache_write_tokens: number;
     cost_usd: string | null;
   };
+  issued_by: string | null;
+  review: { answers: number; edited: number };
 }
 
 export const ACTIVE_STATUSES = ["queued", "generating"];

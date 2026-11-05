@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { API_BASE, apiFetch, apiPost, orgPath } from "@/lib/api";
+import { API_BASE, apiFetch, apiPatch, apiPost, orgPath } from "@/lib/api";
 import { useOrg } from "@/lib/session";
 import { ACTIVE_STATUSES, Answer, Citation, Question, Recommendation, Report } from "@/lib/reports";
 import { Progress, StatusBadge } from "@/components/reports";
+import { AnswerEditor } from "@/components/AnswerEditor";
 
 const PRIORITY_STYLES: Record<string, string> = {
   High: "bg-red-100 text-red-700",
@@ -106,6 +107,7 @@ export default function ReportDetailPage() {
   const { org, canWrite } = useOrg();
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState<string | null>(null); // "section/question"
 
   const load = useCallback(
     () => apiFetch(orgPath(org, `reports/${id}/`)).then(setReport).catch((err) => setError(err.message)),
@@ -125,6 +127,23 @@ export default function ReportDetailPage() {
 
   if (error) return <p className="text-red-600">{error}</p>;
   if (!report) return <p className="text-gray-500">Loading...</p>;
+
+  const reviewable = report.status === "completed" && canWrite;
+
+  const saveAnswer = async (sectionKey: string, questionKey: string, value: unknown) => {
+    const updated = (await apiPatch(orgPath(org, `reports/${report.id}/answers/${sectionKey}/${questionKey}/`), { value })) as Answer;
+    // Show the saved answer at once; the reload refreshes the review count and evidence gaps.
+    setReport({
+      ...report,
+      sections: report.sections.map((section) =>
+        section.key !== sectionKey
+          ? section
+          : { ...section, questions: section.questions.map((q) => (q.key === questionKey ? { ...q, answer: updated } : q)) }
+      ),
+    });
+    setEditing(null);
+    load();
+  };
 
   const cachedShare =
     report.usage.input_tokens + report.usage.cache_read_tokens > 0
@@ -171,6 +190,32 @@ export default function ReportDetailPage() {
         </div>
       )}
 
+      {reviewable && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 flex items-center justify-between gap-4">
+          <p className="text-sm text-gray-700">
+            Review the answers and correct anything wrong, then approve. {report.review.edited} of {report.review.answers} answers edited so far.
+          </p>
+          <button
+            onClick={async () => {
+              if (confirm("Approve and issue this report? It will be locked.")) {
+                await apiPost(orgPath(org, `reports/${report.id}/issue/`), {});
+                load();
+              }
+            }}
+            className="text-sm px-3 py-1.5 bg-emerald-600 text-white rounded hover:bg-emerald-700 shrink-0"
+          >
+            Approve and issue
+          </button>
+        </div>
+      )}
+
+      {report.status === "issued" && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6 text-sm text-emerald-900">
+          Issued by {report.issued_by} on {report.issued_at ? new Date(report.issued_at).toLocaleString() : ""}. The report is locked.
+          {report.review.edited > 0 && ` Engineers edited ${report.review.edited} of ${report.review.answers} AI answers.`}
+        </div>
+      )}
+
       {report.evidence_gaps.length > 0 && (
         <section className="bg-amber-50 border border-amber-200 rounded-lg p-5 mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -206,12 +251,41 @@ export default function ReportDetailPage() {
                 <div key={question.key}>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">{question.prompt}</h3>
-                    {question.answer && question.answer.status === "answered" && question.answer.confidence !== "high" && (
+                    {question.answer && question.answer.status === "answered" && !question.answer.edited && question.answer.confidence !== "high" && (
                       <span className="text-[10px] text-gray-400">{question.answer.confidence} confidence</span>
                     )}
+                    {question.answer?.edited && (
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 rounded">edited by {question.answer.edited_by}</span>
+                    )}
+                    {reviewable && question.answer && editing !== `${section.key}/${question.key}` && (
+                      <button onClick={() => setEditing(`${section.key}/${question.key}`)} className="text-xs text-blue-600 hover:underline ml-auto">
+                        Edit
+                      </button>
+                    )}
                   </div>
-                  {question.answer ? (
-                    <AnswerView question={question} answer={question.answer} org={org} />
+                  {question.answer && editing === `${section.key}/${question.key}` ? (
+                    <AnswerEditor
+                      question={question}
+                      answer={question.answer}
+                      onSave={(value) => saveAnswer(section.key, question.key, value)}
+                      onCancel={() => setEditing(null)}
+                    />
+                  ) : question.answer ? (
+                    <>
+                      <AnswerView question={question} answer={question.answer} org={org} />
+                      {question.answer.edited && question.answer.ai_value !== null && (
+                        <details className="mt-2 text-xs text-gray-500">
+                          <summary className="cursor-pointer">AI draft</summary>
+                          <div className="mt-1 pl-3 border-l-2 border-gray-200">
+                            <AnswerView
+                              question={question}
+                              answer={{ ...question.answer, value: question.answer.ai_value, status: "answered", citations: [] }}
+                              org={org}
+                            />
+                          </div>
+                        </details>
+                      )}
+                    </>
                   ) : (
                     <p className="text-sm text-gray-400">{active ? "Not generated yet..." : "No answer."}</p>
                   )}
