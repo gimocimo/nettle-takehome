@@ -1,10 +1,10 @@
 # Errata
 
 Issues found after the timebox ended (tag `timebox-end`). After closing, I asked a
-second Claude instance to review the code independently. I checked each of its six main findings against the code: all six were
-real. Each is fixed in its own commit, tagged `(BONUS)`, with a regression test that
-fails without the fix. The history up to `timebox-end` is unchanged, so the
-evaluated version is still the one at the tag.
+second Claude instance to review the code independently. I checked each of its six
+main findings against the code: all six were real. Each is fixed in its own commit,
+tagged `(BONUS)`, with a regression test that fails without the fix. The history up
+to `timebox-end` is unchanged, so the evaluated version is still the one at the tag.
 
 | # | What was wrong | Impact | Fix |
 |---|---|---|---|
@@ -22,5 +22,5 @@ What this changes in [SOLUTION.md](SOLUTION.md):
 - There are 173 tests (145 at the tag).
 
 What I take from it: an independent review found real defects that my own tests
-and live runs had missed. I'd make that a standing step before merging anything that touches tenancy, money or AI
-calls.
+and live runs had missed. I'd make that a standing step before merging anything that
+touches tenancy, money or AI calls.
