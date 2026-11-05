@@ -31,6 +31,13 @@ interface EvidenceItem {
   created_at: string;
 }
 
+interface Budget {
+  budget_usd: string | null;
+  spent_usd: string;
+  ratio: number | null;
+  status: "unlimited" | "ok" | "warning" | "exceeded";
+}
+
 interface Template {
   id: string;
   key: string;
@@ -49,6 +56,7 @@ export default function AssessmentDetailPage() {
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templateId, setTemplateId] = useState("");
+  const [budget, setBudget] = useState<Budget | null>(null);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,6 +75,7 @@ export default function AssessmentDetailPage() {
       .catch((err) => setError(err.message));
     loadEvidence();
     loadReports();
+    apiFetch(orgPath(org, "ai-budget/")).then(setBudget);
     apiFetch(orgPath(org, "templates/")).then((list: Template[]) => {
       setTemplates(list);
       if (list.length > 0) setTemplateId(list[0].id);
@@ -119,6 +128,7 @@ export default function AssessmentDetailPage() {
     try {
       await apiPost(orgPath(org, "reports/"), { assessment: id, template: templateId });
       await loadReports();
+      apiFetch(orgPath(org, "ai-budget/")).then(setBudget);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -201,13 +211,23 @@ export default function AssessmentDetailPage() {
                 </select>
                 <button
                   onClick={handleGenerate}
-                  disabled={starting || !templateId || evidence.length === 0}
+                  disabled={starting || !templateId || evidence.length === 0 || budget?.status === "exceeded"}
                   className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {starting ? "Starting..." : "Generate report"}
                 </button>
               </div>
               {selected && <p className="text-xs text-gray-500">Sections: {selected.sections.join(" · ")}</p>}
+              {budget && (budget.status === "warning" || budget.status === "exceeded") && (
+                <p
+                  className={`text-xs rounded px-2 py-1 ${
+                    budget.status === "exceeded" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-800"
+                  }`}
+                >
+                  AI budget: ${Number(budget.spent_usd).toFixed(2)} of ${Number(budget.budget_usd).toFixed(2)} used this month
+                  {budget.status === "exceeded" ? " — new reports are paused until an admin raises it." : "."}
+                </p>
+              )}
               <p className="text-xs text-gray-500">
                 Generation runs in the background: you can leave this page, and you&apos;ll be notified when the report is ready.
               </p>
