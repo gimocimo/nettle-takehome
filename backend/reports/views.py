@@ -1,4 +1,6 @@
 from django.db import IntegrityError, transaction
+from django.http import HttpResponse
+from django.utils.text import slugify
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
@@ -14,6 +16,7 @@ from nettle_core.params import uuid_query_param
 from tenancy.api import OrganizationScopedViewSet
 
 from .definitions import validate_answer_value
+from .pdf import render_report_pdf
 from .models import Report, ReportTemplate
 from .presentation import _answer
 from .serializers import (
@@ -139,6 +142,16 @@ class ReportViewSet(OrganizationScopedViewSet):
         report.status, report.issued_by, report.issued_at = "issued", request.user, timezone.now()
         report.save(update_fields=["status", "issued_by", "issued_at", "updated_at"])
         return Response(ReportSerializer(report, context=self.get_serializer_context()).data)
+
+    @action(detail=True, methods=["get"])
+    def pdf(self, request, pk=None, **kwargs):
+        """Branded PDF of the report (marked DRAFT until it is issued)."""
+        report = self.get_object()
+        if report.template_id is None or report.status not in ("completed", "issued"):
+            raise ValidationError("Only completed structured reports can be exported.")
+        response = HttpResponse(render_report_pdf(report), content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{slugify(report.title) or "report"}.pdf"'
+        return response
 
     @action(detail=True, methods=["post"])
     def regenerate(self, request, pk=None, **kwargs):

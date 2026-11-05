@@ -177,6 +177,14 @@ export default function ReportDetailPage() {
       <div className="flex items-center gap-3 mt-1 mb-1">
         <h1 className="text-2xl font-bold">{report.title || "Untitled report"}</h1>
         <StatusBadge status={report.status} />
+        {(report.status === "completed" || report.status === "issued") && report.sections.length > 0 && (
+          <a
+            href={`${API_BASE}${orgPath(org, `reports/${report.id}/pdf/`)}`}
+            className="ml-auto text-sm px-3 py-1.5 border border-gray-300 rounded bg-white hover:bg-gray-50 shrink-0"
+          >
+            Export PDF
+          </a>
+        )}
       </div>
       <p className="text-gray-500 text-sm mb-6">
         {report.template ? `${report.template.name} (template v${report.template.version}) · ${report.template.language} · ` : ""}
