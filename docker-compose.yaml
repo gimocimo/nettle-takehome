@@ -1,3 +1,20 @@
+# Settings shared by the API and the background worker. Development defaults:
+# production sets these from a secret store.
+x-backend-environment: &backend-environment
+  DJANGO_DEBUG: "1"
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-insecure-key}
+  DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+  DATABASE_URL: postgres://nettle:nettle@db:5432/nettle
+  CORS_ALLOWED_ORIGINS: http://localhost:3000
+  CSRF_TRUSTED_ORIGINS: http://localhost:3000
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5-5}
+
+x-backend-volumes: &backend-volumes
+  - ./backend:/app
+  - ./sample_evidence:/app/sample_evidence:ro
+  - media_data:/app/media
+
 services:
   db:
     image: postgres:15
@@ -24,22 +41,22 @@ services:
              python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
-      - ./sample_evidence:/app/sample_evidence:ro
-      - media_data:/app/media
-    environment:
-      # Development defaults. Production sets these from a secret store.
-      DJANGO_DEBUG: "1"
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-insecure-key}
-      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
-      DATABASE_URL: postgres://nettle:nettle@db:5432/nettle
-      CORS_ALLOWED_ORIGINS: http://localhost:3000
-      CSRF_TRUSTED_ORIGINS: http://localhost:3000
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes: *backend-volumes
+    environment: *backend-environment
     depends_on:
       db:
         condition: service_healthy
+
+  # Runs background jobs (report generation). Scale with `docker compose up --scale worker=3`.
+  worker:
+    build: ./backend
+    command: python manage.py run_worker
+    volumes: *backend-volumes
+    environment: *backend-environment
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
 
   frontend:
     build: ./frontend

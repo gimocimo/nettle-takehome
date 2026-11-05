@@ -49,14 +49,15 @@ def test_lists_never_include_other_organizations_rows(setup, endpoint):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("endpoint", ENDPOINTS)
-@pytest.mark.parametrize("method", ["get", "patch", "put", "delete"])
+@pytest.mark.parametrize("method", ["get", "put", "patch", "delete"])
 def test_other_organizations_objects_are_not_found(setup, endpoint, method):
     org_a, org_b, alice = setup
     path, make = ENDPOINTS[endpoint]
     theirs = make(org_b)
     for url_org in (org_a, org_b):  # through our URL, and through theirs (not a member)
         response = getattr(alice, method)(org_url(url_org, f"{path}{theirs.id}/"), {}, format="json")
-        assert response.status_code == 404, (url_org.slug, response.status_code)
+        # 405: the endpoint doesn't support the method at all, which reveals nothing either.
+        assert response.status_code in (404, 405), (url_org.slug, response.status_code)
     assert type(theirs).objects.filter(pk=theirs.pk).exists()
 
 
@@ -71,8 +72,8 @@ def test_new_objects_cannot_reference_another_organizations_parent(setup, path, 
 
 
 @pytest.mark.django_db
-def test_report_generation_cannot_target_another_organizations_report(setup):
+def test_report_retry_cannot_target_another_organizations_report(setup):
     org_a, org_b, alice = setup
-    theirs = make_report(make_assessment(make_client(org_b)))
-    response = alice.post(org_url(org_a, f"reports/{theirs.id}/generate/"))
+    theirs = make_report(make_assessment(make_client(org_b)), status="failed")
+    response = alice.post(org_url(org_a, f"reports/{theirs.id}/retry/"))
     assert response.status_code == 404

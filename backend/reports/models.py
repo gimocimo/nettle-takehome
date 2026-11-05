@@ -157,6 +157,14 @@ class Report(models.Model):
     class Meta:
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["organization", "-created_at"], name="report_org_recent_idx")]
+        constraints = [
+            # A double click can't start two paid generations of the same report.
+            models.UniqueConstraint(
+                fields=["assessment", "template"],
+                condition=models.Q(status__in=["queued", "generating"]),
+                name="one_active_generation",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         # The organization is copied from the parent so every tenant table can be

@@ -22,7 +22,6 @@ def test_report_cannot_be_moved_to_another_assessment(engineer, org):
     client = make_client(org)
     report = make_report(make_assessment(client))
     other = make_assessment(client)
-    response = engineer.patch(
-        org_url(org, f"reports/{report.id}/"), {"assessment": str(other.id)}, format="json"
-    )
-    assert response.status_code == 400
+    engineer.patch(org_url(org, f"reports/{report.id}/"), {"assessment": str(other.id)}, format="json")
+    report.refresh_from_db()
+    assert report.assessment_id != other.id  # only the title is editable

@@ -5,16 +5,17 @@ USAGE = {"input_tokens": 100, "output_tokens": 50, "cache_read_tokens": 2000, "c
 
 
 class FakeLLM:
-    def __init__(self, quote="Sprinklers present", status="answered", fail_on_call=None):
+    def __init__(self, quote="Sprinklers present", status="answered", fail_on_call=None, failure=None):
         self.calls = []
         self.quote = quote
         self.status = status
-        self.fail_on_call = fail_on_call  # 1-based call number that raises a transient error
+        self.fail_on_call = fail_on_call  # 1-based call number that raises `failure`
+        self.failure = failure or LLMError("AI provider temporarily unavailable (fake).", transient=True)
 
     def generate_json(self, *, model, system, content, schema, max_tokens=16000):
         self.calls.append({"model": model, "system": system, "content": content, "schema": schema})
         if self.fail_on_call == len(self.calls):
-            raise LLMError("AI provider temporarily unavailable (fake).", transient=True)
+            raise self.failure
         data = {key: self._answer(prop["properties"]["value"]) for key, prop in schema["properties"].items()}
         return LLMResult(data=data, model=model, usage=dict(USAGE))
 
