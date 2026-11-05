@@ -157,6 +157,8 @@ LOGGING = {
 }
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+# Needed only with an organization-level API key that isn't scoped to a workspace.
+ANTHROPIC_WORKSPACE_ID = os.environ.get("ANTHROPIC_WORKSPACE_ID", "")
 # Deployment default; an organization can override it (Organization.ai_model).
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 AI_EFFORT = os.environ.get("AI_EFFORT", "medium")

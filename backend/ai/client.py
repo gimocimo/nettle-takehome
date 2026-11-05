@@ -33,9 +33,15 @@ class AnthropicClient:
     def __init__(self):
         if not settings.ANTHROPIC_API_KEY:
             raise LLMError("AI generation is not configured (ANTHROPIC_API_KEY is empty).", transient=False)
+        # Organization-level keys must name the workspace the usage belongs to.
+        headers = (
+            {"anthropic-workspace-id": settings.ANTHROPIC_WORKSPACE_ID}
+            if settings.ANTHROPIC_WORKSPACE_ID
+            else None
+        )
         # The SDK already retries 429/5xx/connection errors twice with backoff.
         self._client = anthropic.Anthropic(
-            api_key=settings.ANTHROPIC_API_KEY, max_retries=2, timeout=300.0
+            api_key=settings.ANTHROPIC_API_KEY, max_retries=2, timeout=300.0, default_headers=headers
         )
 
     def generate_json(self, *, model, system, content, schema, max_tokens=16000):
