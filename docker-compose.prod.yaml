@@ -3,14 +3,18 @@
 # TLS terminates in front (load balancer / reverse proxy); for a plain-http local
 # check set DJANGO_SECURE_SSL_REDIRECT=0 (secure cookies still need https to log in).
 #
-#   DJANGO_SECRET_KEY=... POSTGRES_PASSWORD=... ANTHROPIC_API_KEY=... \
+#   DJANGO_SECRET_KEY=... POSTGRES_PASSWORD=... APP_DB_PASSWORD=... ANTHROPIC_API_KEY=... \
 #     docker compose -f docker-compose.prod.yaml up --build
+#
+# The app and the worker log in as nettle_app: not a superuser, can't bypass row-level
+# security, and refused tenant data outside a tenant transaction (tenancy/rls.py).
+# Only the migrate job and the internal admin use the owner role.
 x-backend-environment: &backend-environment
   DJANGO_DEBUG: "0"
   DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
   DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
   DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-1}
-  DATABASE_URL: postgres://nettle:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/nettle
+  DATABASE_URL: postgres://nettle_app:${APP_DB_PASSWORD:?set APP_DB_PASSWORD}@db:5432/nettle
   CORS_ALLOWED_ORIGINS: ${FRONTEND_ORIGIN:-http://localhost:3000}
   CSRF_TRUSTED_ORIGINS: ${FRONTEND_ORIGIN:-http://localhost:3000}
   FRONTEND_URL: ${FRONTEND_ORIGIN:-http://localhost:3000}
@@ -41,10 +45,17 @@ services:
       timeout: 5s
       retries: 15
 
-  # One-off: schema and customer configuration, before any app process starts.
+  # One-off, as the owner: schema, customer configuration, and the app role's login,
+  # before any app process starts.
   migrate:
     <<: *backend-image
-    command: sh -c "python manage.py migrate --noinput && python manage.py sync_config"
+    environment:
+      <<: *backend-environment
+      DATABASE_URL: postgres://nettle:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/nettle
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD}
+    command: >-
+      sh -c "python manage.py migrate --noinput && python manage.py sync_config
+      && python manage.py configure_app_role"
     restart: "no"
     depends_on:
       db:
@@ -62,6 +73,20 @@ services:
   worker:
     <<: *backend-image
     command: python manage.py run_worker
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Nettle staff's cross-tenant Django admin needs the owner role, so it is a separate
+  # service, reachable only from the host here (in production: an internal network).
+  admin:
+    <<: *backend-image
+    environment:
+      <<: *backend-environment
+      DATABASE_URL: postgres://nettle:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/nettle
+    ports:
+      - "127.0.0.1:8001:8000"
     restart: unless-stopped
     depends_on:
       migrate:

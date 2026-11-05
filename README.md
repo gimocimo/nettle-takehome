@@ -114,9 +114,14 @@ production targets (gunicorn, the Next.js standalone server, non-root users), ru
 migrations as a one-off job before the app starts, and requires real secrets:
 
 ```bash
-DJANGO_SECRET_KEY=... POSTGRES_PASSWORD=... ANTHROPIC_API_KEY=... \
+DJANGO_SECRET_KEY=... POSTGRES_PASSWORD=... APP_DB_PASSWORD=... ANTHROPIC_API_KEY=... \
   docker compose -f docker-compose.prod.yaml up --build
 ```
+
+The app and the worker log in to Postgres as `nettle_app`, a role that isn't a
+superuser, can't bypass row-level security and is refused tenant data outside a
+tenant transaction. Nettle staff's cross-tenant Django admin runs as a separate
+service on `127.0.0.1:8001` with the owner role.
 
 ## Layout
 

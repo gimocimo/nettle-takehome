@@ -28,7 +28,7 @@ def setup(db, member_client, monkeypatch):
         progress_total=len(template.ordered_sections()),
     )
     monkeypatch.setattr("reports.generation.get_client", lambda: FakeLLM())
-    generate_report(report.id)
+    generate_report(report.organization, report.id)
     Report.objects.filter(pk=report.pk).update(status="completed")
     return org, report, member_client(org)
 

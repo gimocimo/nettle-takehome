@@ -34,7 +34,7 @@ def generate_report_task(context, *, organization_id, report_id):
         logger.info("Report %s is no longer waiting to be generated; skipping.", report_id)
         return
     try:
-        generate_report(report_id)
+        generate_report(organization, report_id)
     except Exception as exc:
         retrying = will_retry(exc, context.attempt)
         message = str(exc) if isinstance(exc, LLMError) else "Report generation failed unexpectedly."

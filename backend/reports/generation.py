@@ -56,11 +56,10 @@ class GenerationError(LLMError):
     pass
 
 
-def generate_report(report_id):
-    """Generate every not-yet-answered section of a structured report."""
-    report = Report.objects.select_related("organization").get(pk=report_id)
-    organization = report.organization
-
+def generate_report(organization, report_id):
+    """Generate every not-yet-answered section of a structured report. Every read is
+    inside the organization's tenant transaction: the production login role can't
+    read tenant tables outside one."""
     with tenant_transaction(organization):
         report = Report.objects.select_related("assessment__client", "template").get(pk=report_id)
         sections = report.template.ordered_sections()
