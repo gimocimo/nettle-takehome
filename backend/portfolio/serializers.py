@@ -83,7 +83,7 @@ class ClientSerializer(_OrganizationFieldsMixin, serializers.Serializer):
             definition = definitions[key]
             if definition.storage == "column":
                 if value is None and not Client._meta.get_field(key).null:
-                    value = ""
+                    value = ""  # text columns only (test_every_built_in_column_can_be_emptied)
                 setattr(client, key, value)
             else:
                 client.custom_fields[key] = None if value is None else drf_field(definition).to_representation(value)

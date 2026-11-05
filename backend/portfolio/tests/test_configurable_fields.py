@@ -3,9 +3,11 @@ import shutil
 import pytest
 from django.conf import settings
 from django.core.management import call_command
+from django.db import models
 
 from configuration.sync import ConfigError, apply_config, load_config
 from nettle_core.testing import make_assessment, make_client, make_member, org_url
+from portfolio.fields import BUILTIN_FIELDS
 from portfolio.models import Client, ClientFieldDefinition
 from reports.generation import _context_text
 from reports.models import Report
@@ -146,3 +148,20 @@ def test_changing_the_type_of_a_custom_field_with_data_is_refused(orgs, config_d
     path.write_text(path.read_text().replace("      type: text\n      group: company", "      type: integer\n      group: company"))
     with pytest.raises(ConfigError, match="regulatory_body"):
         apply_config(load_config(config_dir))
+
+
+def test_optional_numbers_can_be_cleared(orgs, client_for):
+    api = client_for("default-insurer")
+    url = org_url(orgs["default-insurer"], "portfolio/clients/")
+    created = api.post(url, {"name": "X", "values": {**COMPLETE, "previous_claims_count": 2}}, format="json").data
+    response = api.patch(f"{url}{created['id']}/", {"values": {"previous_claims_count": None}}, format="json")
+    assert response.status_code == 200, response.data
+    assert response.data["values"]["previous_claims_count"] is None
+
+
+def test_every_built_in_column_can_be_emptied():
+    # An emptied field is stored as NULL, or as "" in a text column; a non-null number
+    # column turned "clear this field" into a 500.
+    for key, *_ in BUILTIN_FIELDS:
+        field = Client._meta.get_field(key)
+        assert field.null or isinstance(field, (models.CharField, models.TextField)), key

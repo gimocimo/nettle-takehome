@@ -69,7 +69,8 @@ class Client(models.Model):
         blank=True,
         default="",
     )
-    previous_claims_count = models.IntegerField(default=0)
+    # Nullable like the other optional numbers: an emptied field means "not recorded".
+    previous_claims_count = models.IntegerField(null=True, blank=True, default=0)
     last_assessment_date = models.DateField(null=True, blank=True)
     
     # Each organization's own fields (see portfolio.fields and ClientFieldDefinition).
