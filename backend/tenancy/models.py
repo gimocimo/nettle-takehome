@@ -18,6 +18,8 @@ class Organization(models.Model):
     region = models.CharField(max_length=32, default="eu-west")
     language = models.CharField(max_length=16, default="en-GB")
     currency = models.CharField(max_length=3, default="GBP")
+    # Blank: use the deployment default (settings.ANTHROPIC_MODEL).
+    ai_model = models.CharField(max_length=64, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -25,6 +27,12 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def effective_ai_model(self):
+        from django.conf import settings
+
+        return self.ai_model or settings.ANTHROPIC_MODEL
 
 
 class Membership(models.Model):

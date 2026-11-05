@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "tenancy",
     "configuration",
+    "ai",
     "portfolio",
     "assessments",
     "evidence",
@@ -139,3 +140,9 @@ LOGGING = {
 }
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+# Deployment default; an organization can override it (Organization.ai_model).
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
+AI_EFFORT = os.environ.get("AI_EFFORT", "medium")
+# Photos are downscaled before being sent: the model downscales large images anyway,
+# so full-resolution uploads only add cost and latency (and break provider size limits).
+AI_IMAGE_MAX_EDGE = int(os.environ.get("AI_IMAGE_MAX_EDGE", "1568"))

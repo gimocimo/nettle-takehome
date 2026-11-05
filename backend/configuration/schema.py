@@ -19,6 +19,7 @@ class OrganizationSettings(BaseModel):
     region: str = "eu-west"
     language: str = "en-GB"
     currency: str = Field(default="GBP", pattern=r"^[A-Z]{3}$")
+    ai_model: str = ""  # blank: the deployment default
 
 
 class TemplateConfig(BaseModel):
